@@ -1,0 +1,154 @@
+<% if (success && success.length > 0) { %>
+    <div class="alert alert-success">
+        <ul>
+        <% success.forEach(success => { %>
+        <li><%= success %></li>
+        <% }); %>
+        </ul>
+    </div>
+    <% } %>
+<% if (errors && errors.length > 0) { %>
+    <div class="alert alert-danger">
+        <ul>
+        <% errors.forEach(error => { %>
+        <li><%= error %></li>
+        <% }); %>
+        </ul>
+    </div>
+    <% } %>
+
+<div class="container-fluid">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">        
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="funjumper-tab" data-bs-toggle="tab" data-bs-target="#funjumper" type="button" role="tab" aria-controls="funjumper" aria-selected="false">Funjumper</button> 
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tandem-tab" data-bs-toggle="tab" data-bs-target="#tandem" type="button" role="tab" aria-controls="tandem" aria-selected="false">Tandem</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="organization-tab" data-bs-toggle="tab" data-bs-target="#organization" type="button" role="tab" aria-controls="organization" aria-selected="true">Organization</button>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        
+        <div class="tab-pane fade show active" id="funjumper" role="tabpanel" aria-labelledby="funjumper-tab"> 
+            <div class="container"> 
+
+                <br/><br/><h1>Funjumper - New Transaction</h1> <br/><hr/>
+                <form id="newTransactionForm" method="POST" action="/transactions/create/funjumper"> 
+            
+                    <div class="form-group">
+                        <label for="funjumperId">Funjumper:</label>
+                        <input type="text" class="form-control" id="funjumperSearch" placeholder="Search Funjumper" onkeyup="filterFunjumpers()">
+                        <div id="funjumperSuggestions" class="suggestions-list"></div>
+                        <input type="hidden" id="selectedFunjumperId" name="funjumper_id"> 
+                    </div>
+            
+                    <div class="form-group">
+                        <label for="transactionType">Transaction Type:</label>
+                        <select class="form-control" id="transactionType" name="transaction_type">
+                        <option value="balance_in">Deposit</option>
+                        <option value="buy_jumpticket">Buy Jumpticket</option>
+                        <option value="balance_out">Withdraw</option>
+                        <option value="cancel_jumpticket">Refund Jumpticket</option>
+                        </select>
+                    </div>
+            
+                    <div class="form-group">
+                        <label for="amount">Amount:</label>
+                        <input type="number" class="form-control" id="amount" name="amount" step="0.01" required>
+                    </div>
+            
+                    <div class="form-group">
+                        <label for="notes">Notes:</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                    </div>
+            
+                    <br/><br/>
+                    <button type="submit" class="btn btn-primary">Create Transaction</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="tab-pane fade" id="tandem" role="tabpanel" aria-labelledby="tandem-tab">
+            {/* Tandem tab content */}
+        </div>
+
+        <div class="tab-pane fade" id="organization" role="tabpanel" aria-labelledby="organization-tab">
+            {/* Organization tab content */}
+        </div>
+    </div>
+  </div>
+  
+  <script>
+    
+    const funjumperSearchInput = document.getElementById('funjumperSearch'); 
+    const funjumperSuggestions = document.getElementById('funjumperSuggestions'); 
+
+    async function filterFunjumpers() {
+    const searchTerm = funjumperSearchInput.value.toLowerCase();
+
+    try {
+        const response = await fetch(`/api/search/funjumpers?q=${searchTerm}`); 
+        const data = await response.json();
+
+        funjumperSuggestions.innerHTML = ''; 
+        if (data.length > 0) {
+        const suggestionsList = document.createElement('ul');
+        data.forEach(funjumper => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${funjumper.first_name} ${funjumper.last_name}`; 
+            listItem.addEventListener('click', () => {
+            funjumperSearchInput.value = `${funjumper.first_name} ${funjumper.last_name}`; 
+            funjumperSuggestions.innerHTML = ''; 
+            document.getElementById('selectedFunjumperId').value = funjumper.funjumper_id; 
+            });
+            suggestionsList.appendChild(listItem);
+        });
+        funjumperSuggestions.appendChild(suggestionsList);
+        }
+    } catch (error) {
+        console.error('Error searching for funjumpers:', error);
+    }
+    }
+
+    funjumperSearchInput.addEventListener('keyup', filterFunjumpers);
+  
+    const form = document.querySelector('form');
+    const submitButton = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', (event) => {
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating transactions...';
+    });
+
+    form.addEventListener('reset', () => {
+        submitButton.disabled = false;
+        submitButton.innerHTML = 'Update'; 
+    });
+  </script>
+
+  <style>
+    .suggestions-list {
+      padding: 0;
+      margin: 0;
+      max-height: 200px; /* Adjust as needed */
+      overflow-y: auto;
+    }
+  
+    .suggestions-list li {
+      list-style: none;
+      list-style-type: none;
+      list-style-image: none;
+      padding: 5px 10px;
+      margin-top: 5px;
+      margin-bottom: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+  
+    .suggestions-list li:hover {
+      background-color: #f0f0f0;
+    }
+  </style>

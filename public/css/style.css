@@ -1,0 +1,63 @@
+#container {
+    display: flex;
+    flex-direction: column; /* Change to column for vertical stacking */
+
+}
+
+header {
+    background-color: #539075;
+    padding: 20px;
+    width: 100%; /* Make the banner span the full width */ 
+}
+
+#content-wrapper { 
+    display: flex; /* Use flexbox for the menu and main content */
+    border-left: 1px solid #ccc;
+}
+
+main {
+    flex-grow: 1; 
+    padding: 20px;
+}
+
+aside {
+    min-width: 200px;
+    height: 100vh; /* Make the menu 100% of the viewport height */
+    overflow-y: auto; /* Add scrollbar if menu items exceed viewport height */
+    background-color: #f0f0f0;
+    padding: 20px;
+}
+
+aside ul {
+    list-style: none;
+    padding: 0;
+}
+
+aside ul li a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+    border: 1px solid #ccc; 
+}
+
+aside ul li a:hover {
+    background-color: #f0f0f0;
+    border-color: #aaa; 
+}
+
+.submenu {
+    display: none; 
+    padding-left: 20px; 
+} 
+
+aside ul li:hover .submenu { 
+    display: block; 
+} 
+
+
+aside ul li:hover > a { 
+    border-bottom-left-radius: 0; 
+    border-bottom-right-radius: 0; 
+} 
+

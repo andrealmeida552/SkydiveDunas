@@ -1,0 +1,64 @@
+<div class="row">
+    
+    <div class="col-lg-3"> 
+      <div class="cuadro_intro_hover">
+        <p style="text-align:center; margin-top:10px;">
+        
+        <!--
+          <a href="/"><img src="/img/banner.png" alt="" style="max-height: 100px;"></a>
+        -->
+          
+        </p>
+      </div>
+    </div>
+
+    <div class="col-lg-3" id="weather-container">
+      <% if (typeof weather !== 'undefined' && weather) { %>
+        <div class="row">
+          <div class="col-4">
+            <img src="http://openweathermap.org/img/wn/<%= weather.weather[0].icon %>@2x.png" alt="Weather Icon" style="max-width: 100%;">
+          </div>
+          <div class="col-8 text-start">
+            <p><strong>Temperature:</strong> <%= weather.main.temp %>°C</p>
+            <p><strong>Wind:</strong> 
+              <% 
+                const windSpeedKt = Math.round(weather.wind.speed * 1.94); 
+                const isWindHigh = windSpeedKt > 20; 
+                const windDirection = weather.wind.deg; // Get wind direction in degrees
+
+                // Function to convert degrees to cardinal direction
+                function getWindDirectionCardinal(degrees) {
+                  if (degrees >= 337.5 || degrees < 22.5) return 'N';
+                  if (degrees >= 22.5 && degrees < 67.5) return 'NE';
+                  if (degrees >= 67.5 && degrees < 112.5) return 'E';
+                  if (degrees >= 112.5 && degrees < 157.5) return 'SE';
+                  if (degrees >= 157.5 && degrees < 202.5) return 'S';
+                  if (degrees >= 202.5 && degrees < 247.5) return 'SW';
+                  if (degrees >= 247.5 && degrees < 292.5) return 'W';
+                  if (degrees >= 292.5 && degrees < 337.5) return 'NW';
+                  return '?'; // Unknown direction
+                }
+
+                const windDirectionCardinal = getWindDirectionCardinal(windDirection);
+              %>
+              <span class="<%= isWindHigh ? 'text-warning' : '' %>">
+                <%= windSpeedKt %> kt | <%= windDirectionCardinal %> (<%= windDirection %>°)
+              </span>
+            <p><strong>Clouds:</strong> <%= weather.clouds.all %>%</p>
+          </div>
+        </div>
+      <% } %>
+    </div>
+    
+    <div class="col-lg-6 text-end"> 
+        <% if (user) { %>
+            <h3>User</h3>
+            <a href="/login" style="color: inherit;"><%= user.username  %></a><br>
+            <a>Rolelevel: <%= user.rolelevel %></a><br>
+            <a href="/logout" style="color: inherit;">Logout</a>
+        <% } else { %>
+            <h3>Guest</h3><br>
+            <a href="/login" style="color: inherit;">Login</a>
+        <% } %>
+    </div>
+  </div>

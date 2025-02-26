@@ -1,0 +1,124 @@
+<% if (errors && errors.length > 0) { %>
+  <div class="alert alert-danger">
+    <ul>
+      <% errors.forEach(error => { %>
+        <li><%= error %></li>
+      <% }); %>
+    </ul>
+  </div>
+<% } %>
+
+<div class= "container-fluid table-responsive">
+
+  <h1>List of Pilots</h1>
+
+  <table id="refuelTable" class="table table-sm table-striped table-bordered table-hover">
+      <thead>
+      <tr>
+          <th onclick="sortTable(0)">↕ Refuel ID</th>
+          <th onclick="sortTable(1)">↕ Airplane Tail Number</th>
+          <th onclick="sortTable(2)">↕ Pilot Name</th> 
+          <th onclick="sortTable(3)">↕ Refuel Date</th> 
+          <th onclick="sortTable(4)">↕ Refuel Hour</th> 
+          <th onclick="sortTable(5)">↕ Fuel Type Name</th> 
+          <th onclick="sortTable(6)">↕ Quantity (Liters)</th> 
+          <th onclick="sortTable(7)">↕ Price (Euro/Liter)</th> 
+          <th onclick="sortTable(8)">↕ Total Cost (Euro)</th> 
+          <th onclick="sortTable(9)">↕ Added Mass (kg)</th> 
+      </tr>
+      <tr>
+          <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(0)" placeholder="Search"> <button type="button" onclick="clearFilter(0)">Clear</button></th>
+          <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(1)" placeholder="Search"> <button type="button" onclick="clearFilter(1)">Clear</button></th>
+          <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(2)" placeholder="Search"> <button type="button" onclick="clearFilter(2)">Clear</button></th>
+          <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(3)" placeholder="Search"> <button type="button" onclick="clearFilter(3)">Clear</button></th>
+          <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(4)" placeholder="Search"> <button type="button" onclick="clearFilter(4)">Clear</button></th>
+          <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(5)" placeholder="Search"> <button type="button" onclick="clearFilter(5)">Clear</button></th>
+          <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(6)" placeholder="Search"> <button type="button" onclick="clearFilter(6)">Clear</button></th>
+          <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(7)" placeholder="Search"> <button type="button" onclick="clearFilter(7)">Clear</button></th>
+          <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(8)" placeholder="Search"> <button type="button" onclick="clearFilter(8)">Clear</button></th>
+          <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(9)" placeholder="Search"> <button type="button" onclick="clearFilter(9)">Clear</button></th>
+      </tr>
+      </thead>
+      <tbody>
+      <% listContent.forEach(RefuelInfo => { %>
+          <tr>
+          <td scope="row"><%= RefuelInfo.refuel_id %></td> 
+          <td><%= RefuelInfo.tail_number %></td> 
+          <td><%= RefuelInfo.pilot_name %></td> 
+          <td><%= new Date(RefuelInfo.refuel_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td> 
+          <td><%= RefuelInfo.refuel_hour %></td> 
+          <td><%= RefuelInfo.fuel_type_name %></td> 
+          <td><%= RefuelInfo.fuel_quantity_liters %></td> 
+          <td><%= RefuelInfo.price_per_liter %></td> 
+          <td><%= RefuelInfo.cost %></td> 
+          <td><%= RefuelInfo.added_mass %></td>
+          </tr>
+      <% }); %>
+      </tbody>
+  </table>
+
+</div>
+
+<script>
+  function sortTable(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById("refuelTable");
+    switching = true;
+    dir = "asc"; 
+    while (switching) {
+      switching = false;
+      rows = table.rows;
+      for (i = 1; i < (rows.length - 1); i++) {
+        shouldSwitch = false;
+        x = rows[i].getElementsByTagName("TD")[n];
+        y = rows[i + 1].getElementsByTagName("TD")[n];
+        if (dir == "asc") {
+          if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+            shouldSwitch= true;
+            break;
+          }
+        } else if (dir == "desc") {
+          if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+            shouldSwitch= true;
+            break;
+          }
+        }
+      }
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+        switchcount ++;
+      } else {
+        if (switchcount == 0 && dir == "asc") {
+          dir = "desc";
+          switching = true;
+        }
+      }
+    }
+  }
+
+  function filterTable(n) {
+      var input, filter, table, tr, td, i, txtValue;
+      input = document.getElementsByTagName('input')[n]; 
+      filter = input.value.toUpperCase();
+      table = document.getElementById("refuelTable");
+      tr = table.getElementsByTagName("tr");
+      for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[n]; 
+        if (td) {
+          txtValue = td.textContent || td.innerText;
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }       
+      }
+    }
+
+    function clearFilter(n) {
+      var input = document.getElementsByTagName('input')[n];
+      input.value = ""; // Clear the input field
+      filterTable(n); // Re-filter the table with empty search term
+    }
+</script>

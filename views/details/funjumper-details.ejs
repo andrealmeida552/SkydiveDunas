@@ -1,0 +1,205 @@
+<% if (errors && errors.length > 0) { %>
+  <div class="alert alert-danger">
+    <ul>
+      <% errors.forEach(error => { %>
+        <li><%= error %></li>
+      <% }); %>
+    </ul>
+  </div>
+<% } %>
+
+<% if (funjumper.balance < 0 || funjumper.jump_ticket_balance < 0) { %>
+  <div class="alert alert-danger">
+    <strong>Warning:</strong> Negative balance detected. Please review and address any debts.
+  </div>
+<% } %>
+<% 
+  const today = new Date();
+  const licenseExpireDate = new Date(funjumper.license_expire); 
+  const insuranceExpireDate = new Date(funjumper.insurance_expire);
+  const repackDueDate = new Date(funjumper.repack_duedate); 
+%>
+<% if (licenseExpireDate < today) { %> 
+  <div class="alert alert-warning">
+    <strong>Warning:</strong> Your license has expired. Please update your license information.
+  </div>
+<% } %>
+<% if (insuranceExpireDate < today) { %> 
+  <div class="alert alert-warning">
+    <strong>Warning:</strong> Your insurance has expired. Please update your insurance information.
+  </div>
+<% } %>
+<% if (repackDueDate < today) { %> 
+  <div class="alert alert-warning">
+    <strong>Warning:</strong> Your rig repack date has passed. Please schedule a repack.
+  </div>
+<% } %>
+
+<div class="container">
+  <h2>Funjumper Details</h2><a href="/funjumpers/<%= funjumper.funjumper_id %>/edit" class="btn btn-primary btn-sm">Edit or Update</a> 
+  <br/><br/><br/>
+  <hr/>
+  <div class="row">
+    <div class="col-md-6">
+      <h3>Personal Information</h3>
+      <ul class="list-group">
+        <li class="list-group-item"><strong>Funjumper ID:</strong> <%= funjumper.funjumper_id %></li>
+        <li class="list-group-item"><strong>First Name:</strong> <%= funjumper.first_name %></li>
+        <li class="list-group-item"><strong>Middle Name(s):</strong> <%= funjumper.middle_names %></li>
+        <li class="list-group-item"><strong>Last Name:</strong> <%= funjumper.last_name %></li>
+        <li class="list-group-item"><strong>Date of Birth:</strong> <%= new Date(funjumper.date_of_birth).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })%></li>
+        <li class="list-group-item"><strong>Nationality:</strong> <%= funjumper.nationality %></li>
+        <li class="list-group-item"><strong>Email:</strong> <%= funjumper.email %></li>
+        <li class="list-group-item"><strong>Phone:</strong> <%= funjumper.phone_number %></li>
+        <li class="list-group-item"><strong>Number of Jumps:</strong> <%= funjumper.number_of_jumps %></li>
+        <li class="list-group-item"><strong>Waiver Signed:</strong> <%= funjumper.waiver_signed %></li>
+        <li class="list-group-item"><strong>Passport/Card ID Number:</strong> <%= funjumper.civil_id_number %></li>
+        <li class="list-group-item"><strong>Passport/Card ID Expires:</strong> <%= new Date(funjumper.civil_id_expires).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></li>
+      </ul><br/>
+    </div>
+    <div class="col-md-6">
+      <h3>Balance Information</h3>
+      <ul class="list-group">
+        <li class="list-group-item"><strong>Balance:</strong> 
+          <% if (funjumper.balance < 0) { %>
+            <span class="text-danger font-weight-bold"><strong><%= funjumper.balance %></strong></span> 
+          <% } else { %>
+            <%= funjumper.balance %>
+          <% } %>
+        </li>
+        <li class="list-group-item"><strong>Jump Ticket Balance:</strong> 
+          <% if (funjumper.jump_ticket_balance < 0) { %>
+            <span class="text-danger font-weight-bold"><strong><%= funjumper.jump_ticket_balance %></strong></span> 
+          <% } else { %>
+            <%= funjumper.jump_ticket_balance %>
+          <% } %>
+        </li>
+      </ul><br/>
+
+      <h3>Address Information</h3>
+      <ul class="list-group">
+        <li class="list-group-item"><strong>Street:</strong> <%= funjumper.street_address %></li>
+        <li class="list-group-item"><strong>City:</strong> <%= funjumper.city_address %></li>
+        <li class="list-group-item"><strong>Postal Code:</strong> <%= funjumper.postal_code %></li>
+        <li class="list-group-item"><strong>Country:</strong> <%= funjumper.country %></li>
+      </ul><br/>
+
+      <h3>License Information</h3>
+      <ul class="list-group">
+        <li class="list-group-item"><strong>License Issuer:</strong> <%= funjumper.license_issuer %></li>
+        <li class="list-group-item"><strong>License Letter:</strong> <%= funjumper.license_letter %></li>
+        <li class="list-group-item"><strong>License Number:</strong> <%= funjumper.license_number %></li>
+        <li class="list-group-item"><strong>License Expires:</strong> <%= new Date(funjumper.license_expire).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></li>
+      </ul><br/>
+    </div>
+  </div>
+
+  <br/><hr/><br/>
+
+  <div class="row">
+    <div class="col-md-6">
+      <h3>Insurance Information</h3>
+      <ul class="list-group">
+        <li class="list-group-item"><strong>Insurance Issuer:</strong> <%= funjumper.insurance_issuer %></li>
+        <li class="list-group-item"><strong>Insurance Number:</strong> <%= funjumper.insurance_number %></li>
+        <li class="list-group-item"><strong>Insurance Expires:</strong> <%= new Date(funjumper.insurance_expire).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></li>
+      </ul><br/>
+    </div>
+    <div class="col-md-6">
+      <h3>Health Insurance Information</h3>
+      <ul class="list-group">
+        <li class="list-group-item"><strong>Health Insurance Issuer:</strong> <%= funjumper.insurance_issuer_health %></li>
+        <li class="list-group-item"><strong>Health Insurance Number:</strong> <%= funjumper.insurance_number_health %></li>
+        <li class="list-group-item"><strong>Health Insurance Expires:</strong> <%= new Date(funjumper.insurance_expire_health).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></li>
+      </ul><br/>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <h3>Emergency Contact Information</h3>
+      <ul class="list-group">
+        <li class="list-group-item"><strong>Contact Name:</strong> <%= funjumper.emergency_contact_name %></li>
+        <li class="list-group-item"><strong>Contact Relation:</strong> <%= funjumper.emergency_contact_relation %></li>
+        <li class="list-group-item"><strong>Contact Phone Number:</strong> <%= funjumper.emergency_contact_phone %></li>
+        <li class="list-group-item"><strong>Contact Email:</strong> <%= funjumper.emergency_contact_email %></li>
+      </ul><br/>
+    </div>
+    <div class="col-md-6">
+      <h3>Rig Information</h3>
+      <ul class="list-group">
+        <li class="list-group-item"><strong>Canopy Brand & Type:</strong> <%= funjumper.canopy_brand_type %></li>
+        <li class="list-group-item"><strong>Canopy Size:</strong> <%= funjumper.canopy_size %></li>
+        <li class="list-group-item"><strong>Container Brand:</strong> <%= funjumper.container_manufaturer %></li>
+        <li class="list-group-item"><strong>Reserve Brand:</strong> <%= funjumper.reserve_brand %></li>
+        <li class="list-group-item"><strong>Reserve Size:</strong> <%= funjumper.reserve_size %></li>
+        <li class="list-group-item"><strong>Repack Duedate:</strong> <%= new Date(funjumper.repack_duedate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></li>
+      </ul><br/>
+    </div>
+  </div>
+
+  <br/><hr/><br/>
+
+  <div class="row">
+    <div class="col-md-12">
+      <h3>Jumps</h3>
+      <table class="table table-striped table-responsive"  style="max-height: 200px; overflow-y: auto;">
+        <thead>
+          <tr>
+            <th>Jump ID</th>
+            <th>Load ID</th>
+            <th>Date</th>
+            <th>Hour</th> 
+            <th>Aircraft</th> 
+            <th>Group ID</th> 
+            <th>Height</th> 
+          </tr>
+        </thead>
+        <tbody>
+          <% jumps.forEach(jump => { %>
+            <tr>
+              <td><%= jump.jump_id %></td>
+              <td><%= jump.load_id %></td>
+              <td><%= new Date(jump.takeoff_datetime).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td> 
+              <td><%= new Date(jump.takeoff_datetime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) %></td> 
+              <td><%= jump.tail_number %></td> 
+              <td><%= jump.group_id %></td> 
+              <td><%= jump.height_feet %></td> 
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <br/><hr/><br/>
+
+  <div class="row">
+    <div class="col-md-12">
+      <h3>Transactions</h3>
+      <table class="table table-striped table-responsive"  style="max-height: 200px; overflow-y: auto;">
+        <thead>
+          <tr>
+            <th>Transaction ID</th>
+            <th>Date</th>
+            <th>Hour</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Description</th> 
+          </tr>
+        </thead>
+        <tbody>
+          <% transactions.forEach(transaction => { %>
+            <tr>
+              <td><%= transaction.transaction_id %></td>
+              <td><%= new Date(transaction.transaction_datetime).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td> 
+              <td><%= new Date(transaction.transaction_datetime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) %></td> 
+              <td><%= transaction.transaction_type %></td> 
+              <td><%= transaction.amount %></td> 
+              <td><%= transaction.notes %></td> 
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>

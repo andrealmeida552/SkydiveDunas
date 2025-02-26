@@ -1,0 +1,136 @@
+<% if (success && success.length > 0) { %>
+    <div class="alert alert-success">
+        <ul>
+        <% success.forEach(success => { %>
+        <li><%= success %></li>
+        <% }); %>
+        </ul>
+    </div>
+    <% } %>
+  <% if (errors && errors.length > 0) { %>
+    <div class="alert alert-danger">
+      <ul>
+        <% errors.forEach(error => { %>
+          <li><%= error %></li>
+        <% }); %>
+      </ul>
+    </div>
+  <% } %>
+  
+  <div class="container-fluid">
+    <h1>Tandem Checkin</h1>
+    <form action="/register/new-instructor" method="POST">
+      <div class="row">
+        <div class="col-md-8">
+  
+          <div class="mb-3">
+            <div class="form-group">
+                <label for="funjumperSearch">Search Funjumper:</label>
+                <input type="text" class="form-control" id="funjumperSearch" placeholder="Enter Funjumper Name" onkeyup="filterFunjumpers()"> 
+            </div>
+              <div id="funjumperSuggestions" class="suggestions-list"></div>
+              <input type="hidden" id="selectedFunjumperId" name="selectedFunjumperId">
+          </div>
+  
+          <div class="mb-3">
+            <label for="tandem_jumps">Tandem Jumps</label>
+            <input type="text" class="form-control" id="tandem_jumps" name="tandem_jumps">
+          </div>
+
+          <div class="mb-3">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="tandem_rating" name="tandem_rating">
+              <label class="form-check-label" for="tandem_rating">Tandem Rating</label>
+            </div>
+          </div>
+  
+          <div class="mb-3">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="camera_rating" name="camera_rating">
+              <label class="form-check-label" for="camera_rating">Tandem Camera Rating</label>
+            </div>
+          </div>
+  
+          <div class="mb-3">
+            <label for="notes">Notes</label>
+            <input type="text" class="form-control" id="notes" name="notes" >
+          </div>
+  
+        </div>
+      </div>
+      <br><br>
+      <button type="submit" class="btn btn-primary">Checkin</button>
+    </form>
+  </div>
+  
+  <script>
+    const form = document.querySelector('form');
+    const submitButton = form.querySelector('button[type="submit"]');
+  
+    form.addEventListener('submit', (event) => {
+      submitButton.disabled = true;
+      submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Registering Instructor...';
+    });
+  
+    form.addEventListener('reset', () => {
+      submitButton.disabled = false;
+      submitButton.innerHTML = 'Register Instructor'; 
+    });
+
+
+    const funjumperSearchInput = document.getElementById('funjumperSearch');
+  const funjumperSuggestions = document.getElementById('funjumperSuggestions');
+
+  async function filterFunjumpers() {
+    const searchTerm = funjumperSearchInput.value.toLowerCase();
+
+    await fetch(`/api/search/funjumpers?q=${searchTerm}`) 
+      .then(response => response.json())
+      .then(data => {
+        funjumperSuggestions.innerHTML = ''; 
+        if (data.length > 0) {
+          const suggestionsList = document.createElement('ul');
+          data.forEach(funjumper => {
+            const listItem = document.createElement('li');
+            listItem.textContent = funjumper.first_name + ' ' + funjumper.last_name;
+            listItem.addEventListener('click', () => {
+              funjumperSearchInput.value = funjumper.first_name + ' ' + funjumper.last_name; 
+              funjumperSuggestions.innerHTML = '';
+              document.getElementById('selectedFunjumperId').value = funjumper.funjumper_id; 
+            });
+            suggestionsList.appendChild(listItem);
+          });
+          funjumperSuggestions.appendChild(suggestionsList);
+        }
+      })
+      .catch(error => {
+        console.error('Error searching for funjumpers:', error);
+      });
+    }
+  </script>
+
+
+  <style>
+    .suggestions-list {
+      padding: 0;
+      margin: 0;
+      max-height: 200px; /* Adjust as needed */
+      overflow-y: auto;
+    }
+  
+    .suggestions-list li {
+      list-style: none;
+      list-style-type: none;
+      list-style-image: none;
+      padding: 5px 10px;
+      margin-top: 5px;
+      margin-bottom: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+  
+    .suggestions-list li:hover {
+      background-color: #f0f0f0;
+    }
+  </style>

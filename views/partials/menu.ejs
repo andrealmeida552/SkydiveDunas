@@ -1,0 +1,14 @@
+<ul class="list-group">
+    <% menuItems.forEach(item => { %>
+        <li>
+            <a href="<%= item.url %>"><%= item.label %></a>
+            <% if (item.submenu) { %>
+                <ul class="submenu">
+                    <% item.submenu.forEach(subitem => { %>
+                        <li><a href="<%= subitem.url %>"><%= subitem.label %></a></li>
+                    <% }); %>
+                </ul>
+            <% } %>
+        </li>
+    <% }); %>
+</ul>

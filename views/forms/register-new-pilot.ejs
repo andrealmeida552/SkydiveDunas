@@ -1,0 +1,140 @@
+<% if (errors && errors.length > 0) { %>
+    <div class="alert alert-danger">
+      <ul>
+        <% errors.forEach(error => { %>
+          <li><%= error %></li>
+        <% }); %>
+      </ul>
+    </div>
+  <% } %>
+
+<div class="container-fluid">
+    <form action="/register/new-pilot" method="POST">
+        <div class="row">
+            <div class="col-md-6"> 
+                    <div class="mb-3">
+                        <label for="first_name" class="form-label">First Name:</label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="middle_names" class="form-label">Middle Names:</label>
+                        <input type="text" class="form-control" id="middle_names" name="middle_names">
+                    </div>
+        
+                    <div class="mb-3">
+                        <label for="last_name" class="form-label">Last Name:</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="date_of_birth" class="form-label">Date of Birth:</label>
+                        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" required> 
+                    </div>
+            </div>
+
+            <hr/>
+
+            <div class="col-md-6"> 
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email:</label>
+                    <input type="text" class="form-control" id="email" name="email" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="phone_number" class="form-label">Phone Number:</label>
+                    <input type="text" class="form-control" id="phone_number" name="phone_number" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="ratings" class="form-label">Ratings:</label>
+                    <input type="text" class="form-control" id="ratings" name="ratings" required>
+                </div>
+            </div>
+
+        </div>
+
+        <hr/>
+
+        <div class="row">
+    
+            <div class="col-md-3"> 
+                <div class="mb-3">
+                    <label for="license_number" class="form-label">License Number:</label>
+                    <input type="text" class="form-control" id="license_number" name="license_number" required> 
+                </div>
+
+                <div class="mb-3">
+                    <label for="license_expiration_date" class="form-label">License Expiration Date:</label>
+                    <input type="date" class="form-control" id="license_expiration_date" name="license_expiration_date" required> 
+                </div>
+
+                <div class="mb-3">
+                    <label for="medical_expiration_date" class="form-label">Medical Expiration Date:</label>
+                    <input type="date" class="form-control" id="medical_expiration_date" name="medical_expiration_date" required> 
+                </div>
+            </div>
+
+            <div class="col-md-3"> 
+                <div class="mb-3">
+                    <label for="local_hours" class="form-label">Local Hours:</label>
+                    <input type="text" class="form-control" id="local_hours" name="local_hours"> 
+                </div>
+
+                <div class="mb-3">
+                    <label for="landings" class="form-label">Landings:</label>
+                    <input type="text" class="form-control" id="landings" name="landings"> 
+                </div>
+
+                <div class="mb-3">
+                    <label for="total_hours" class="form-label">Total Hours:</label>
+                    <input type="text" class="form-control" id="total_hours" name="total_hours" required> 
+                </div>
+
+            </div>
+
+        </div>
+
+        <hr/>
+
+        <div class="row">
+    
+            <div class="col-md-3"> 
+                <div class="mb-3">
+                    <label for="emergency_contact_name" class="form-label">Emergency Contact Name:</label>
+                    <input type="text" class="form-control" id="emergency_contact_name" name="emergency_contact_name" required> 
+                </div>
+
+                <div class="mb-3">
+                    <label for="emergency_contact_phone" class="form-label">Emergency Contact Phone:</label>
+                    <input type="text" class="form-control" id="emergency_contact_phone" name="emergency_contact_phone" required> 
+                </div>
+            </div>
+
+            <div class="col-md-3"> 
+                <div class="mb-3">
+                    <label for="emergency_contact_relation" class="form-label">Emergency Contact Relation:</label>
+                    <input type="text" class="form-control" id="emergency_contact_relation" name="emergency_contact_relation" required> 
+                </div>
+
+                <div class="mb-3">
+                    <label for="emergency_contact_email" class="form-label">Emergency Contact Email:</label>
+                    <input type="text" class="form-control" id="emergency_contact_email" name="emergency_contact_email" required> 
+                </div>
+            </div>
+        </div>
+
+        <hr/>
+
+        <div class="row">
+            <div class="col-md-6"> 
+                <div class="mb-3">
+                    <label for="pay_per_load" class="form-label">Pay per Load:</label>
+                    <input type="text" class="form-control" id="pay_per_load" name="pay_per_load" required> 
+                </div>
+            </div>
+        </div>
+    
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+  </div>

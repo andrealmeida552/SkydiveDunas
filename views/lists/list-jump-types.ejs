@@ -1,0 +1,103 @@
+<% if (errors && errors.length > 0) { %>
+    <div class="alert alert-danger">
+      <ul>
+        <% errors.forEach(error => { %>
+          <li><%= error %></li>
+        <% }); %>
+      </ul>
+    </div>
+  <% } %>
+
+<div class="container-fluid">
+
+    <h1>List of Fuel Types</h1>
+
+    <table id="jumpTypesTable" class="table table-sm table-striped table-bordered table-hover">
+        <thead>
+        <tr>
+            <th onclick="sortTable(0)" style="width: 150px;" >↕ Jump Type ID</th>
+            <th onclick="sortTable(1)">↕ Jump Type Description</th> 
+            <th onclick="sortTable(2)">↕ Exit Altitude (feet)</th> 
+        </tr>
+        <tr>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(0)" placeholder="Search ID"> <button type="button" onclick="clearFilter(0)">Clear</button></th>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(1)" placeholder="Search Name"> <button type="button" onclick="clearFilter(1)">Clear</button></th>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(2)" placeholder="Search Altitude"> <button type="button" onclick="clearFilter(2)">Clear</button></th>
+        </tr>
+        </thead>
+        <tbody>
+        <% listContent.forEach(jumpType => { %>
+            <tr>
+            <td scope="row"><%= jumpType.jump_type_id %></td> 
+            <td><%= jumpType.jump_name %></td> 
+            <td><%= jumpType.height_feet %></td> 
+            </tr>
+        <% }); %>
+        </tbody>
+    </table>
+
+  </div>
+
+  <script>
+    function sortTable(n) {
+      var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+      table = document.getElementById("jumpTypesTable");
+      switching = true;
+      dir = "asc"; 
+      while (switching) {
+        switching = false;
+        rows = table.rows;
+        for (i = 1; i < (rows.length - 1); i++) {
+          shouldSwitch = false;
+          x = rows[i].getElementsByTagName("TD")[n];
+          y = rows[i + 1].getElementsByTagName("TD")[n];
+          if (dir == "asc") {
+            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+              shouldSwitch= true;
+              break;
+            }
+          } else if (dir == "desc") {
+            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+              shouldSwitch= true;
+              break;
+            }
+          }
+        }
+        if (shouldSwitch) {
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+          switching = true;
+          switchcount ++;
+        } else {
+          if (switchcount == 0 && dir == "asc") {
+            dir = "desc";
+            switching = true;
+          }
+        }
+      }
+    }
+
+    function filterTable(n) {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementsByTagName('input')[n]; 
+        filter = input.value.toUpperCase();
+        table = document.getElementById("jumpTypesTable");
+        tr = table.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+          td = tr[i].getElementsByTagName("td")[n]; 
+          if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+              tr[i].style.display = "";
+            } else {
+              tr[i].style.display = "none";
+            }
+          }       
+        }
+      }
+
+      function clearFilter(n) {
+        var input = document.getElementsByTagName('input')[n];
+        input.value = ""; // Clear the input field
+        filterTable(n); // Re-filter the table with empty search term
+      }
+  </script>

@@ -1,0 +1,100 @@
+<% if (errors && errors.length > 0) { %>
+    <div class="alert alert-danger">
+      <ul>
+        <% errors.forEach(error => { %>
+          <li><%= error %></li>
+        <% }); %>
+      </ul>
+    </div>
+  <% } %>
+
+<div class="container-fluid">
+
+    <h1>List of Fuel Types</h1>
+
+    <table id="fuelTypesTable" class="table table-sm table-striped table-bordered table-hover">
+        <thead>
+        <tr>
+            <th onclick="sortTable(0)" style="width: 150px;" >↕ Fuel ID</th>
+            <th onclick="sortTable(1)">↕ Fuel Name</th> 
+        </tr>
+        <tr>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(0)" placeholder="Search ID"> <button type="button" onclick="clearFilter(0)">Clear</button></th>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(1)" placeholder="Search Name"> <button type="button" onclick="clearFilter(1)">Clear</button></th>
+        </tr>
+        </thead>
+        <tbody>
+        <% listContent.forEach(fuelType => { %>
+            <tr>
+            <td scope="row"><%= fuelType.fuel_type_id %></td> 
+            <td><%= fuelType.fuel_name %></td> 
+            </tr>
+        <% }); %>
+        </tbody>
+    </table>
+
+  </div>
+
+  <script>
+    function sortTable(n) {
+      var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+      table = document.getElementById("fuelTypesTable");
+      switching = true;
+      dir = "asc"; 
+      while (switching) {
+        switching = false;
+        rows = table.rows;
+        for (i = 1; i < (rows.length - 1); i++) {
+          shouldSwitch = false;
+          x = rows[i].getElementsByTagName("TD")[n];
+          y = rows[i + 1].getElementsByTagName("TD")[n];
+          if (dir == "asc") {
+            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+              shouldSwitch= true;
+              break;
+            }
+          } else if (dir == "desc") {
+            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+              shouldSwitch= true;
+              break;
+            }
+          }
+        }
+        if (shouldSwitch) {
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+          switching = true;
+          switchcount ++;
+        } else {
+          if (switchcount == 0 && dir == "asc") {
+            dir = "desc";
+            switching = true;
+          }
+        }
+      }
+    }
+
+    function filterTable(n) {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementsByTagName('input')[n]; 
+        filter = input.value.toUpperCase();
+        table = document.getElementById("fuelTypesTable");
+        tr = table.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+          td = tr[i].getElementsByTagName("td")[n]; 
+          if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+              tr[i].style.display = "";
+            } else {
+              tr[i].style.display = "none";
+            }
+          }       
+        }
+      }
+
+      function clearFilter(n) {
+        var input = document.getElementsByTagName('input')[n];
+        input.value = ""; // Clear the input field
+        filterTable(n); // Re-filter the table with empty search term
+      }
+  </script>

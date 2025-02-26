@@ -1,0 +1,94 @@
+<% if (errors && errors.length > 0) { %>
+    <div class="alert alert-danger">
+      <ul>
+        <% errors.forEach(error => { %>
+          <li><%= error %></li>
+        <% }); %>
+      </ul>
+    </div>
+  <% } %>
+
+<div class="container-fluid">
+    <form action="/operation/new-load" method="POST">
+        <div class="row">
+            <div class="col-md-3"> 
+              <div class="mb-3">
+                <label for="airplane_id" class="form-label">Airplane:</label>
+                <select class="form-select" id="airplane_id" name="airplane_id" required>
+                  <option value="">Select Airplane</option>
+                  <% if (lastload) { %>
+                      <option value="<%= lastload.airplane_id %>" selected><%= lastLoadAirplane %></option>
+                  <% } %>
+                  <% airplanes.forEach(airplane => { %>
+                    <% if (lastload) { %>
+                      <% if (airplane.airplane_id != lastload.airplane_id) { %>
+                        <option value="<%= airplane.airplane_id %>"><%= airplane.tail_number %></option>
+                      <% } %>
+                    <% } else {%>
+                      <option value="<%= airplane.airplane_id %>"><%= airplane.tail_number %></option>
+                    <% } %>
+                  <% }); %>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="pilot_id" class="form-label">Pilot:</label>
+                <select class="form-select" id="pilot_id" name="pilot_id" required>
+                  <option value="">Select Pilot</option>
+                  <% if (lastload) { %>
+                      <option value="<%= lastload.pilot_id %>" selected><%= lastLoadPilot.first_name %> <%= lastLoadPilot.last_name %> </option>
+                  <% } %>
+                  <% pilots.forEach(pilot => { %>
+                    <% if (lastload) { %>
+                      <% if (pilot.pilot_id != lastload.pilot_id) { %>
+                        <option value="<%= pilot.pilot_id %>"><%= pilot.first_name %> <%= pilot.last_name %></option>
+                      <% } %>
+                    <% } else {%>
+                      <option value="<%= pilot.pilot_id %>"><%= pilot.first_name %> <%= pilot.last_name %></option>
+                    <% } %>
+                  <% }); %>
+                </select>
+              </div>
+              
+              <div class="mb-3">
+                <label for="takeoff_date" class="form-label">Takeoff Date:</label>
+                <input type="date" class="form-control" id="takeoff_date" name="takeoff_date" value="<%= new Date().toISOString().split('T')[0] %>" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="takeoff_hour" class="form-label">Takeoff Hour:</label>
+                <input type="time" class="form-control" id="takeoff_hour" name="takeoff_hour" required>
+              </div>
+
+              <div class="form-check mb-3"> 
+                <input class="form-check-input" type="checkbox" value="1" id="status" name="status">
+                <label for="status" class="form-check-label">Active? (check for "yes")</label>
+              </div>
+
+              <div class="mb-3">
+                <label for="notes" class="form-label">Notes:</label>
+                <input type="text" class="form-control" id="notes" name="notes">
+              </div>
+              
+            </div>
+        </div>
+    
+        <button type="submit" class="btn btn-primary">New Load</button>
+    </form>
+  </div>
+
+
+  <script>
+    const form = document.querySelector('form');
+    const submitButton = form.querySelector('button[type="submit"]');
+  
+    form.addEventListener('submit', (event) => {
+      submitButton.disabled = true;
+      submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding Load...';
+    });
+  
+    form.addEventListener('reset', () => {
+      submitButton.disabled = false;
+      submitButton.innerHTML = 'Update'; 
+    });
+  </script>

@@ -1,0 +1,104 @@
+<div class="container">
+  <h1><%= title %></h1>
+  <button class="btn btn-primary" onclick="exportToPDF()">Export to PDF</button>
+
+  <div class="card mt-4">
+    <div class="card-body">
+      <h2 class="card-title">Short Resume</h2>
+      <p><strong>Total Loads:</strong> <%= loadData.length %></p>
+      <p><strong>Total Funjumpers Slots:</strong> <%= totalFunjumpers %></p>
+      <p><strong>Total Tandems Slots:</strong> <%= totalTandems * 2  %></p>
+      <% 
+      let totalJumpers = totalFunjumpers + totalTandems*2;
+      %>
+      <p><strong>Total Jumpers:</strong> <%= totalJumpers %></p>
+      <!--
+      <% 
+        let totalAirplanes = new Set();
+        loadData.forEach(load =>{
+          totalAirplanes.add(load.tailNumber);
+        });
+      %>
+      <p><strong>Total Airplanes Used:</strong> <%= totalAirplanes.size %></p>
+      
+      <%
+        let totalPilots = new Set();
+        loadData.forEach(load =>{
+          totalPilots.add(load.pilotName);
+        });
+      %>
+      <p><strong>Total Pilots:</strong> <%= totalPilots.size %></p>
+      -->
+    </div>
+  </div>
+
+  <br><hr><br>
+
+  <% loadData.forEach(load => { %>
+    <div class="card mb-4">
+      <div class="card-body">
+        <h2 class="card-title">Load ID: <%= load.loadId %></h2>
+        <div class="row">
+          <div class="col-md-3">
+            <p><strong>Pilot:</strong> <%= load.pilotName %></p>
+          </div>
+          <div class="col-md-3">
+            <p><strong>Airplane:</strong> <%= load.tailNumber %></p>
+          </div>
+          <div class="col-md-3">
+            <p><strong>Takeoff Time:</strong> <%= new Date(load.takeoffTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) %></p>
+          </div>
+          <div class="col-md-3">
+            <p><strong>Notes:</strong> <%= load.notes %></p>
+          </div>
+        </div>
+
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th>Jumper Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% load.jumps.forEach(jump => { %>
+              <tr>
+                <td>
+                  <% if (jump.type === 'funjumper') { %>
+                    <%= jump.first_name %> <%= jump.last_name %>
+                  <% } else if (jump.type === 'tandem') { %>
+                    <%= jump.passenger_first_name %> <%= jump.passenger_last_name %> (Passenger)
+                    <% if (jump.instructor_first_name) { %>
+                      <br> <%= jump.instructor_first_name %> <%= jump.instructor_last_name %> (Instructor)
+                    <% } %>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% }); %>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  function exportToPDF() {
+    if (window.jsPDF) {
+      const doc = new window.jsPDF();
+      const content = document.querySelector('.container');
+      const contentHTML = content.innerHTML;
+
+      doc.html(contentHTML, {
+        callback: function (doc) {
+          doc.save('resume.pdf');
+        },
+        x: 10,
+        y: 10,
+      });
+    } else {
+      console.error('jsPDF library not loaded.');
+      alert('PDF export failed. jsPDF library not loaded.');
+    }
+  }
+</script>

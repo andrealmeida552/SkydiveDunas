@@ -1,0 +1,127 @@
+<% if (errors && errors.length > 0) { %>
+  <div class="alert alert-danger">
+    <ul>
+      <% errors.forEach(error => { %>
+        <li><%= error %></li>
+      <% }); %>
+    </ul>
+  </div>
+<% } %>
+
+<div class="container-fluid">
+
+  <% 
+  const today = new Date(); 
+  const options = { day: '2-digit', month: '2-digit', year: 'numeric' }; 
+  const formattedDate = new Intl.DateTimeFormat('en-GB', options).format(today); 
+  %>
+
+  <h1>Manifest: <%= formattedDate %></h1>
+  <br>
+  <hr>
+
+  <div class="row">
+    <div class="col-md-12">
+      <h2>Active Loads</h2>
+      <table id="activeLoadsTable" class="table table-sm table-striped table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>Load ID</th>
+            <th>Tail Number</th>
+            <th>Pilot</th>
+            <th>Takeoff Time</th>
+            <th>Notes</th>
+            <th>Available Slots</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% activeLoads.forEach(load => { %>
+            <tr class="active-load">
+              <td><%= load.load_id %></td>
+              <td><%= load.tail_number %></td>
+              <td><%= load.pilot_name %></td>
+              <td><%= new Date(load.takeoff_datetime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) %></td>
+              <td><%= load.notes %></td>
+              <td><%= load.slots - load.usedSlots  %></td> 
+              <td>
+                <button class="btn btn-sm btn-warning" onclick="toggleLoadStatus(<%= load.load_id %>)" id="toggleStatusButton_<%= load.load_id %>">
+                  <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>Toggle Status</button> 
+                <!-- <button class="btn btn-sm btn-primary">View Details</button>  -->
+                <a href="/operation/manifest/details/<%= load.load_id %>" class="btn btn-sm btn-primary">View Details</a>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+
+      <br>
+      <hr>
+      <br>
+    
+      <h2>Inactive Loads</h2>
+      <table id="inactiveLoadsTable" class="table table-sm table-striped table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>Load ID</th>
+            <th>Tail Number</th>
+            <th>Pilot</th>
+            <th>Takeoff Time</th>
+            <th>Notes</th>
+            <th>Used Slots</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% inactiveLoads.forEach(load => { %>
+            <tr class="inactive-load">
+              <td><%= load.load_id %></td>
+              <td><%= load.tail_number %></td>
+              <td><%= load.pilot_name %></td>
+              <td><%= new Date(load.takeoff_datetime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) %></td>
+              <td><%= load.notes %></td>
+              <td><%= load.usedSlots %> / <%= load.slots %></td> 
+              <td>
+                <button class="btn btn-sm btn-warning" onclick="toggleLoadStatus(<%= load.load_id %>)" id="toggleStatusButton_<%= load.load_id %>">
+                  <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>Toggle Status</button> 
+                <!-- <button class="btn btn-sm btn-primary">View Details</button>  -->
+                <a href="/operation/manifest/details/<%= load.load_id %>" class="btn btn-sm btn-primary">View Details</a>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function toggleLoadStatus(loadId) {
+    const button = document.getElementById(`toggleStatusButton_${loadId}`); 
+    const spinner = button.querySelector('.spinner-border'); 
+  
+    spinner.classList.remove('d-none'); 
+    button.disabled = true; 
+  
+    fetch(`/operation/manifest/toggle-status/${loadId}`, {
+      method: 'POST' 
+    })
+    .then(response => {
+      if (response.ok) {
+        // Refresh the page after successful status toggle
+        location.reload(); 
+      } else {
+        alert('Error toggling load status.'); 
+        spinner.classList.add('d-none'); 
+        button.disabled = false; 
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('An error occurred while toggling load status.');
+      spinner.classList.add('d-none'); 
+      button.disabled = false; 
+    });
+  }
+</script>

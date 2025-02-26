@@ -1,0 +1,605 @@
+<% if (errors && errors.length > 0) { %>
+  <div class="alert alert-danger">
+    <ul>
+      <% errors.forEach(error => { %>
+        <li><%= error %></li>
+      <% }); %>
+    </ul>
+  </div>
+<% } %>
+
+<div class="container-fluid">
+  <h2>Load Details - Load <%= load.load_id %></h2>
+  <button class="btn btn-primary" onclick="copyResumeLink()">Copy Daily Resume Link</button>
+
+  <br><hr><br>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Airplane Information</h5>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item"><strong>Tail Number:</strong> <%= load.tail_number %></li>
+            <li class="list-group-item"><strong>Aircraft Type:</strong> <%= load.aircraft_type %></li>
+            <li class="list-group-item"><strong>Pilot:</strong> <%= load.pilot_name %></li>
+            <li class="list-group-item"><strong>Slots:</strong> <%= load.slots %></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Load Information</h5>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item"><strong>Takeoff Datetime:</strong> <%= new Date(load.takeoff_datetime).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit' }) %>
+            <input type="time" id="newTakeoffTime" style="margin-left: 10px;">
+            <button type="button" class="btn btn-sm btn-primary" id="updateTakeoffButton" onclick="updateTakeoffTime(<%= load.load_id %>)">
+              <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span> 
+              Update
+            </button>
+            </li>
+            <li class="list-group-item"><strong>Available Slots:</strong> <%= load.slots - funjumpers.length - tandems.length*2 %></li>
+            <li class="list-group-item"><strong>Status:</strong> <%= load.status === 1 ? 'Active' : 'Inactive' %>
+              <button class="btn btn-sm btn-warning" onclick="toggleLoadStatus(<%= load.load_id %>)" id="toggleStatusButton_<%= load.load_id %>">
+                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>Toggle Status</button>   
+              </li>
+            <li class="list-group-item"><strong>Notes:</strong> <%= load.notes %></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="mt-4">Jumpers</h2>
+  <table class="table table-bordered table-hover">
+    <thead>
+      <tr>
+        <th>Jump ID</th>
+        <th>Funjumper ID</th>
+        <th>Funjumper Name</th>
+        <th>Canopy Size</th>
+        <th>Jump Ticket Balance</th>
+        <th>Group ID</th>
+        <th>Notes</th>
+        <th>Exit Altitude</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for (const funjumper of funjumpers) { %>
+        <tr>
+          <td><%= funjumper.jump_id %></td>
+          <td><%= funjumper.funjumper_id %></td>
+          <td><%= funjumper.funjumper_name %>
+          <a href="/funjumpers/<%= funjumper.funjumper_id %>"><button type="button" class="btn btn-info"> 
+                Details</button></a></td>
+          <td><%= funjumper.canopy_size %></td>
+          <td><%= funjumper.jump_ticket_balance %></td>
+          <td><%= funjumper.group_id %></td>
+          <td><%= funjumper.notes %></td>
+          <td><%= funjumper.height_feet %></td>
+          
+          <td>
+            <button type="button" class="btn btn-danger" 
+                    onclick="removeFunjumper(<%= funjumper.jump_id %>, <%= load.load_id %>)" 
+                    id="removeButton_<%= funjumper.jump_id %>"> 
+              <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span> 
+              Remove
+            </button>
+          </td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+  <h2 class="mt-4">Tandem Jumpers</h2>
+  <table class="table table-bordered table-hover">
+    <thead>
+      <tr>
+        <th>Tandem ID</th>
+        <th>Passenger Name</th>
+        <th>Instructor Name</th>
+        <th>Videos</th>
+        <th>Photos</th>
+        <th>Notes</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for (const tandem of tandems) { %>
+        <tr>
+          <td><%= tandem.tandem_id %></td>
+          <td><%= tandem.passenger_name %></td>
+          <td><%= tandem.instructor_name || 'Not assigned' %></td>
+          <td><%= tandem.videos ?  "Yes" : "No" %></td>
+          <td><%= tandem.photos ?  "Yes" : "No" %></td>
+          <td><%= tandem.notes %></td>
+          <td>
+            <button type="button" class="btn btn-danger"
+                    onclick="removeTandem(<%= tandem.tandem_id %>, <%= load.load_id %>)"
+                    id="removeTandemButton_<%= tandem.tandem_id %>">
+              <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+              Remove
+            </button>
+          </td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+
+  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFunjumperModal"
+  <% if (funjumpers.length + tandems.length  >= load.slots) { %>
+    disabled
+  <% } %> >
+    Add Funjumper
+  </button>
+
+  <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addTandemModal"
+    <% if (funjumpers.length + tandems.length >= load.slots - 2) { %>
+      disabled
+    <% } %> >
+    Add Tandem
+  </button>
+
+  <div class="modal fade" id="addFunjumperModal" tabindex="-1" aria-labelledby="addFunjumperModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addFunjumperModalLabel">Add Funjumper to Load</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="funjumperSearch">Search Funjumper:</label>
+            <input type="text" class="form-control" id="funjumperSearch" placeholder="Enter Funjumper Name" onkeyup="filterFunjumpers()"> 
+          </div>
+          <div id="funjumperSuggestions" class="suggestions-list"></div>
+          <input type="hidden" id="selectedFunjumperId"> 
+          <div class="form-group">
+            <label for="exitAltitude">Exit Altitude:</label>
+            <select class="form-control" id="exitAltitude">
+              <% for (const jumpType of jumpTypes) { %>
+                <option value="<%= jumpType.height_feet %>"><%= jumpType.jump_name %> (<%= jumpType.height_feet %> ft)</option>
+              <% } %>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="groupId">Group ID:</label>
+            <input type="number" class="form-control" id="groupId" placeholder="Enter Group ID">
+          </div>
+          <div class="form-group">
+            <label for="funjumperNotes">Notes:</label>
+            <textarea class="form-control" id="funjumperNotes" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="addFunjumperToLoad(<%= load.load_id %>)" id="addFunjumperButton">
+            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span> Add Funjumper
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="addTandemModal" tabindex="-1" aria-labelledby="addTandemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addTandemModalLabel">Add Tandem to Load</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="passengerSearch">Search Passenger:</label>
+            <input type="text" class="form-control" id="passengerSearch" placeholder="Enter Passenger Name" onkeyup="filterPassengers()">
+          </div>
+          <div id="passengerSuggestions" class="suggestions-list"></div>
+          <input type="hidden" id="selectedPassengerId">
+  
+          <div class="form-group">
+            <label for="instructorSearch">Search Tandem Instructor:</label>
+            <input type="text" class="form-control" id="instructorSearch" placeholder="Enter Instructor Name" onkeyup="filterInstructors()">
+          </div>
+          <div id="instructorSuggestions" class="suggestions-list"></div>
+          <input type="hidden" id="selectedInstructorId">
+  
+          <div class="form-group">
+            <label for="tandemNotes">Notes:</label>
+            <textarea class="form-control" id="tandemNotes" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="addTandemToLoad(<%= load.load_id %>)" id="addTandemButton">
+            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span> Add Tandem
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<script>
+
+  async function copyResumeLink() {
+    const takeoffTime = '<%= load.takeoff_datetime %>';
+    const date = new Date(takeoffTime);
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    const formattedDate = day + month + year;
+    const secret = 'skydive dunas ' + formattedDate;
+    const hash = CryptoJS.MD5(secret).toString();
+
+    const baseUrl = window.location.origin; // Get the base URL
+    const resumeUrl = `${baseUrl}/operation/resume/${formattedDate}/${hash}`;
+
+    try {
+      await navigator.clipboard.writeText(resumeUrl);
+      alert('Resume link copied to clipboard!');
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+      alert('Failed to copy resume link to clipboard.');
+    }
+  }
+
+  const passengerSearchInput = document.getElementById('passengerSearch');
+  const passengerSuggestions = document.getElementById('passengerSuggestions');
+  const instructorSearchInput = document.getElementById('instructorSearch');
+  const instructorSuggestions = document.getElementById('instructorSuggestions');
+
+  async function filterPassengers() {
+    const searchTerm = passengerSearchInput.value.toLowerCase();
+
+    await fetch(`/api/search/passengers?q=${searchTerm}`) // Create this endpoint
+      .then(response => response.json())
+      .then(data => {
+        passengerSuggestions.innerHTML = '';
+        if (data.length > 0) {
+          const suggestionsList = document.createElement('ul');
+          data.forEach(passenger => {
+            const listItem = document.createElement('li');
+            listItem.textContent = passenger.first_name + ' ' + passenger.last_name;
+            listItem.addEventListener('click', () => {
+              passengerSearchInput.value = passenger.first_name + ' ' + passenger.last_name;
+              passengerSuggestions.innerHTML = '';
+              document.getElementById('selectedPassengerId').value = passenger.passenger_id; // Replace with actual ID
+            });
+            suggestionsList.appendChild(listItem);
+          });
+          passengerSuggestions.appendChild(suggestionsList);
+        }
+      })
+      .catch(error => {
+        console.error('Error searching for passengers:', error);
+      });
+  }
+
+  async function filterInstructors() {
+    const searchTerm = instructorSearchInput.value.toLowerCase();
+
+    await fetch(`/api/search/instructors?q=${searchTerm}`) // Create this endpoint
+      .then(response => response.json())
+      .then(data => {
+        instructorSuggestions.innerHTML = '';
+        if (data.length > 0) {
+          const suggestionsList = document.createElement('ul');
+          data.forEach(instructor => {
+            const listItem = document.createElement('li');
+            listItem.textContent = instructor.first_name + ' ' + instructor.last_name;
+            listItem.addEventListener('click', () => {
+              instructorSearchInput.value = instructor.first_name + ' ' + instructor.last_name;
+              instructorSuggestions.innerHTML = '';
+              document.getElementById('selectedInstructorId').value = instructor.instructor_id; // Replace with actual ID
+            });
+            suggestionsList.appendChild(listItem);
+          });
+          instructorSuggestions.appendChild(suggestionsList);
+        }
+      })
+      .catch(error => {
+        console.error('Error searching for instructors:', error);
+      });
+  }
+
+  async function addTandemToLoad(loadId) {
+    const selectedPassengerId = document.getElementById('selectedPassengerId').value;
+    const selectedInstructorId = document.getElementById('selectedInstructorId').value;
+    const tandemNotes = document.getElementById('tandemNotes').value;
+
+    const addTandemButton = document.getElementById('addTandemButton');
+    const spinner = addTandemButton.querySelector('.spinner-border');
+    spinner.classList.remove('d-none');
+    addTandemButton.disabled = true;
+
+    if (!selectedPassengerId || !selectedInstructorId) {
+      alert('Please select a passenger and an instructor.');
+      spinner.classList.add('d-none');
+      addTandemButton.disabled = false;
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/loads/${loadId}/add-tandem`, { // Create this endpoint
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          passengerId: selectedPassengerId,
+          instructorId: selectedInstructorId,
+          notes: tandemNotes
+        })
+      });
+
+      if (response.ok) {
+        $('#addTandemModal').modal('hide');
+        location.reload();
+      } else {
+        const data = await response.json();
+        alert(data.message || 'Error adding tandem to load.');
+      }
+    } catch (error) {
+      console.error('Error adding tandem:', error);
+      alert('An error occurred while adding tandem to load.');
+    } finally {
+      spinner.classList.add('d-none');
+      addTandemButton.disabled = false;
+    }
+  }
+
+  passengerSearchInput.addEventListener('keyup', filterPassengers);
+  instructorSearchInput.addEventListener('keyup', filterInstructors);
+
+  const funjumperSearchInput = document.getElementById('funjumperSearch');
+  const funjumperSuggestions = document.getElementById('funjumperSuggestions');
+
+  async function filterFunjumpers() {
+    const searchTerm = funjumperSearchInput.value.toLowerCase();
+
+    await fetch(`/api/search/funjumpers?q=${searchTerm}`) 
+      .then(response => response.json())
+      .then(data => {
+        funjumperSuggestions.innerHTML = ''; 
+        if (data.length > 0) {
+          const suggestionsList = document.createElement('ul');
+          data.forEach(funjumper => {
+            const listItem = document.createElement('li');
+            listItem.textContent = funjumper.first_name + ' ' + funjumper.last_name;
+            listItem.addEventListener('click', () => {
+              funjumperSearchInput.value = funjumper.first_name + ' ' + funjumper.last_name; 
+              funjumperSuggestions.innerHTML = '';
+              document.getElementById('selectedFunjumperId').value = funjumper.funjumper_id; 
+            });
+            suggestionsList.appendChild(listItem);
+          });
+          funjumperSuggestions.appendChild(suggestionsList);
+        }
+      })
+      .catch(error => {
+        console.error('Error searching for funjumpers:', error);
+      });
+  }
+  
+  async function addFunjumperToLoad(loadId) {
+    const selectedFunjumperId = document.getElementById('selectedFunjumperId').value; 
+    const exitAltitude = document.getElementById('exitAltitude').value;
+    const groupId = document.getElementById('groupId').value; 
+    const funjumperNotes = document.getElementById('funjumperNotes').value;
+
+    // Related to the spinning wheel:
+    const addFunjumperButton = document.getElementById('addFunjumperButton'); 
+    const spinner = addFunjumperButton.querySelector('.spinner-border');
+    spinner.classList.remove('d-none'); // Show the spinner
+    addFunjumperButton.disabled = true;
+     
+  
+    if (selectedFunjumperId === '') {
+      alert('Please select a funjumper from the suggestions.');
+      return;
+    }
+  
+    try {
+      const response = await fetch(`/api/loads/${loadId}/add-funjumper`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          funjumperId: selectedFunjumperId, 
+          exitAltitude: exitAltitude,
+          groupId: groupId, 
+          notes: funjumperNotes 
+        })
+      });
+  
+      if (response.ok) {
+        // Close the modal and refresh the page
+        $('#addFunjumperModal').modal('hide'); 
+        location.reload(); 
+      } else {
+        const data = await response.json(); 
+        alert(data.message || 'Error adding funjumper to load.'); 
+      }
+    } catch (error) {
+      console.error('Error adding funjumper:', error);
+      alert('An error occurred while adding funjumper to load.');
+    } finally {
+      spinner.classList.add('d-none'); // Hide the spinner
+      addFunjumperButton.disabled = false; 
+    }
+  }
+
+  async function removeTandem(tandemId, loadId) {
+    const removeButton = document.getElementById(`removeTandemButton_${tandemId}`);
+    const spinner = removeButton.querySelector('.spinner-border');
+  
+    spinner.classList.remove('d-none');
+    removeButton.disabled = true;
+  
+    if (confirm("Are you sure you want to remove this tandem from the load?")) {
+      try {
+        const response = await fetch(`/api/loads/${loadId}/remove-tandem/${tandemId}`, {
+          method: 'DELETE'
+        });
+  
+        if (response.ok) {
+          location.reload();
+        } else {
+          alert('Error removing tandem from load.');
+        }
+      } catch (error) {
+        console.error('Error removing tandem:', error);
+        alert('An error occurred while removing tandem from load.');
+      } finally {
+        spinner.classList.add('d-none');
+        removeButton.disabled = false;
+      }
+    } else {
+      spinner.classList.add('d-none');
+      removeButton.disabled = false;
+    }
+  }
+
+  async function removeFunjumper(jumpId, loadId) { 
+    
+    const removeButton = document.getElementById(`removeButton_${jumpId}`); 
+    const spinner = removeButton.querySelector('.spinner-border'); 
+  
+    spinner.classList.remove('d-none'); 
+    removeButton.disabled = true; 
+  
+    if (confirm("Are you sure you want to remove this funjumper from the load?")) {
+      try {
+        const response = await fetch(`/api/loads/${loadId}/remove-funjumper/${jumpId}`, {
+          method: 'DELETE'
+        });
+  
+        if (response.ok) {
+          location.reload(); 
+        } else {
+          alert('Error removing funjumper from load.');
+        }
+      } catch (error) {
+        console.error('Error removing funjumper:', error);
+        alert('An error occurred while removing funjumper from load.');
+      } finally {
+        spinner.classList.add('d-none'); 
+        removeButton.disabled = false; 
+      }
+    }
+    else {
+      spinner.classList.add('d-none'); 
+      removeButton.disabled = false; 
+    }
+  }
+
+  async function updateTakeoffTime(loadId) {
+    const updateTakeoffButton = document.getElementById('updateTakeoffButton');
+    const spinner = updateTakeoffButton.querySelector('.spinner-border');
+    const buttonText = updateTakeoffButton.textContent.trim(); // Get initial button text
+  
+    spinner.classList.remove('d-none'); // Show the spinner
+    updateTakeoffButton.disabled = true;
+    updateTakeoffButton.textContent = 'Updating...'; 
+  
+    const newTimeInput = document.getElementById('newTakeoffTime');
+    const newTime = newTimeInput.value;
+  
+    if (!newTime) {
+      alert('Please enter a new takeoff time.');
+      spinner.classList.add('d-none'); // Hide the spinner
+      updateTakeoffButton.disabled = false;
+      updateTakeoffButton.textContent = buttonText; 
+      return;
+    }
+  
+    try {
+      const response = await fetch(`/api/loads/${loadId}/update-takeoff-time`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          newTime: newTime
+        })
+      });
+  
+      if (response.ok) {
+        location.reload(); 
+      } else {
+        alert('Error updating takeoff time.');
+      }
+    } catch (error) {
+      console.error('Error updating takeoff time:', error);
+      alert('An error occurred while updating takeoff time.');
+    } finally {
+      spinner.classList.add('d-none'); // Hide the spinner
+      updateTakeoffButton.disabled = false;
+      updateTakeoffButton.textContent = buttonText; 
+    }
+  }
+
+  funjumperSearchInput.addEventListener('keyup', filterFunjumpers);
+
+  function toggleLoadStatus(loadId) {
+    const button = document.getElementById(`toggleStatusButton_${loadId}`); 
+    const spinner = button.querySelector('.spinner-border'); 
+  
+    spinner.classList.remove('d-none'); 
+    button.disabled = true; 
+  
+    fetch(`/operation/manifest/toggle-status/${loadId}`, {
+      method: 'POST' 
+    })
+    .then(response => {
+      if (response.ok) {
+        // Refresh the page after successful status toggle
+        location.reload(); 
+      } else {
+        alert('Error toggling load status.'); 
+        spinner.classList.add('d-none'); 
+        button.disabled = false; 
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('An error occurred while toggling load status.');
+      spinner.classList.add('d-none'); 
+      button.disabled = false; 
+    });
+  }
+
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+<style>
+  .suggestions-list {
+    padding: 0;
+    margin: 0;
+    max-height: 200px; /* Adjust as needed */
+    overflow-y: auto;
+  }
+
+  .suggestions-list li {
+    list-style: none;
+    list-style-type: none;
+    list-style-image: none;
+    padding: 5px 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  .suggestions-list li:hover {
+    background-color: #f0f0f0;
+  }
+</style>

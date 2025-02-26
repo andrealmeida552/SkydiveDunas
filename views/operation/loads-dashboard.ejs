@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= title %></title> 
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"> 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    
+</head>
+<body>
+
+    <div id="container">
+        <header>
+            <%- include('../partials/banner') %> 
+        </header>
+    </div>
+
+    <div id="content-wrapper">
+
+        <main>
+            <div id="page-content"> 
+                
+                <h1>Manifest Dashboard</h1> <hr/> <br/>
+
+                <div class="row">
+                    <% for (let i = columns.length - 1; i >= 0; i--) { %>
+                        <% if (columns[i]) { %>
+                            <div class="col-md-3 mb-4"> 
+                                <div class="card rounded">
+                                <div class="card-body">
+                                    <% if (columns[i]) { %>
+                                    <h5 class="card-title">Load ID: <%= columns[i].load.load_id %></h5>
+                                    <% 
+                                    const now = new Date();
+                                    const takeoffTime = new Date(columns[i].load.takeoff_datetime); 
+                                    const timeDifference = takeoffTime - now; 
+                                    const minutesUntilTakeoff = Math.floor(timeDifference / (1000 * 60)); 
+                                    %>
+                                    <p class="card-text">Hour: <%= new Date(columns[i].load.takeoff_datetime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) %> 
+                                        <span class="<%= minutesUntilTakeoff < 8 ? 'text-danger font-weight-bold' : (minutesUntilTakeoff < 12 ? 'text-warning font-weight-bold' : '') %>">
+                                            <strong>(<%= minutesUntilTakeoff %> minutes)</strong></p>
+                                        </span>
+
+                                    <p class="card-text">Tail Number: <%= columns[i].tailNumber %></p>
+                                    <p class="card-text">Pilot: <%= columns[i].pilotName %></p> 
+                                    <ul class="list-group list-group-flush">
+                                        <% columns[i].jumps.forEach((jump, index) => { %>
+                                        <li class="list-group-item <%= index % 2 === 0 ? 'bg-light' : '' %>">
+                                            <div class="row">
+                                                <div class="col-8"> 
+                                                    <% if (jump.type === 'funjumper') { %>
+                                                        <%= jump.fullName %>
+                                                    <% } else if (jump.type === 'tandem') { %>
+                                                        <strong><%= jump.passengerName %></strong> <br> <%= jump.instructorName %>
+                                                    <% } %>
+                                                </div>
+                                                <div class="col-4 text-end">
+                                                    <% if (jump.type === 'tandem' && jump.media) { %>
+                                                      <%= jump.media %>
+                                                    <% } %>
+                                                </div>
+                                                <!-- 
+                                                <div class="col-4 text-end"> 
+                                                    <%= jump.height_feet %> ft 
+                                                </div>
+                                                 -->
+                                            </div>
+                                        </li> 
+                                        <% }); %>
+                                    </ul>
+                                    <% } else { %>
+                                    <p class="card-text">No data available.</p>
+                                    <% } %>
+                                </div>
+                                </div>
+                            </div>
+                        <% } %>
+                    <% } %>
+                  </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> 
+    <script src="../public/js/main_script.js"></script>
+
+    <script>
+        function refreshDashboard() {
+            location.reload(); 
+          }
+      
+          // Schedule automatic refresh every 30 seconds
+          setInterval(refreshDashboard, 30000); 
+    </script>
+
+
+</body>
+</html>

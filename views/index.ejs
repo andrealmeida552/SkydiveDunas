@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= title %></title> 
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"> 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+
+    <div id="container">
+        <header>
+            <%- include('./partials/banner') %> 
+        </header>
+    </div>
+
+    <div id="content-wrapper">
+        <aside>
+            <% if(user) { %>
+                <%- include('./partials/menu') %> 
+            <% } %>
+        </aside>
+
+        <main>
+            <div id="page-content"> 
+                <% if (page === 'main-page') { %>
+                    <%- include('./partials/main-page') %> 
+                <% } else if (page === 'operation-refuel') { %>
+                    <%- include('./operation/refuel') %> 
+                <% } else if (page === 'tandem-checkin') { %>
+                    <%- include('./tandem/checkin') %> 
+                <% } else if (page === 'register-new-instructor') { %>
+                    <%- include('./forms/register-new-instructor') %> 
+                <% } else if (page === 'tandem-list-passengers') { %>
+                    <%- include('./tandem/list-passengers') %> 
+                <% } else if (page === 'operation-resume') { %>
+                    <%- include('./operation/resume') %>  
+                <% } else if (page === 'operation-manifest') { %>
+                    <%- include('./operation/manifest') %>  
+                <% } else if (page === 'operation-load-details') { %>
+                    <%- include('./operation/load-details') %> 
+                <% } else if (page === 'operation-new-load') { %>
+                    <%- include('./operation/new-load') %> 
+                <% } else if (page === 'list-fuel-types') { %>
+                    <%- include('./lists/list-fuel-types') %> 
+                <% } else if (page === 'list-jump-types') { %>
+                    <%- include('./lists/list-jump-types') %> 
+                <% } else if (page === 'list-airplanes') { %>
+                    <%- include('./lists/list-airplanes') %> 
+                <% } else if (page === 'list-pilots') { %>
+                    <%- include('./lists/list-pilots') %> 
+                <% } else if (page === 'list-loads') { %>
+                    <%- include('./lists/list-loads') %> 
+                <% } else if (page === 'list-jumps') { %>
+                    <%- include('./lists/list-jumps') %> 
+                    <% } else if (page === 'list-transactions') { %>
+                        <%- include('./lists/list-transactions') %> 
+                <% } else if (page === 'list-refuels') { %>
+                    <%- include('./lists/list-refuels') %> 
+                <% } else if (page === 'list-funjumpers') { %>
+                    <%- include('./lists/list-funjumpers') %> 
+                <% } else if (page === 'list-instructors') { %>
+                    <%- include('./lists/list-instructors') %> 
+                <% } else if (page === 'register-new-jump-type') { %>
+                    <%- include('./forms/register-new-jump-type') %> 
+                <% } else if (page === 'register-new-fuel-type') { %>
+                    <%- include('./forms/register-new-fuel-type') %> 
+                <% } else if (page === 'register-new-pilot') { %>
+                    <%- include('./forms/register-new-pilot') %> 
+                <% } else if (page === 'register-new-user') { %>
+                    <%- include('./forms/register-new-user') %> 
+                <% } else if (page === 'register-new-funjumper') { %>
+                    <%- include('./forms/register-new-funjumper') %> 
+                <% } else if (page === 'register-new-airplane') { %>
+                    <%- include('./forms/register-new-airplane') %>  
+                <% } else if (page === 'funjumper-details') { %>
+                    <%- include('./details/funjumper-details') %>  
+                <% } else if (page === 'edit-funjumper') { %>
+                    <%- include('./forms/edit-funjumper') %>   
+                <% } else if (page === 'new-transaction') { %>
+                    <%- include('./transactions/new-transaction') %> 
+                <% } %>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> 
+    <script src="../public/js/main_script.js"></script>
+</body>
+</html>

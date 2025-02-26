@@ -1,0 +1,259 @@
+<% if (errors && errors.length > 0) { %>
+  <div class="alert alert-danger">
+    <ul>
+      <% errors.forEach(error => { %>
+        <li><%= error %></li>
+      <% }); %>
+    </ul>
+  </div>
+<% } %>
+
+<div class="container-fluid">
+  <h1>Edit Information of Funjumper <%= funjumper.funjumper_id  %></h1>
+  <p><button class="btn btn-sm" onclick="copyToClipboard()">Click to copy edit link</button></p>
+    <input type="hidden" id="editLink" value="https://operation.skydivedunas.com/funjumpers/<%= funjumper.funjumper_id %>/edit/<%= editHash %>">
+  <form action="/funjumpers/<%= funjumper.funjumper_id  %>/update" method="POST">
+      <div class="row">
+          <h2>Personal Information</h2>
+          <div class="col-md-6"> 
+                  <div class="mb-3">
+                      <label for="first_name" class="form-label">First Name:</label>
+                      <input type="text" class="form-control" id="first_name" name="first_name" value="<%= funjumper.first_name %>" required>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="middle_names" class="form-label">Middle Names:</label>
+                      <input type="text" class="form-control" id="middle_names" name="middle_names" value="<%= funjumper.middle_names %>">
+                  </div>
+      
+                  <div class="mb-3">
+                      <label for="last_name" class="form-label">Last Name:</label>
+                      <input type="text" class="form-control" id="last_name" name="last_name" value="<%= funjumper.last_name %>" required>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="date_of_birth" class="form-label">Date of Birth:</label>
+                      <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="<%= funjumper.date_of_birth ? funjumper.date_of_birth.toISOString().split('T')[0] : null  %>" required> 
+                  </div>
+      
+                  <div class="mb-3">
+                      <label for="nationality" class="form-label">Nationality:</label>
+                      <input type="text" class="form-control" id="nationality" name="nationality" value="<%= funjumper.nationality %>" required>
+                  </div>
+      
+                  <div class="mb-3">
+                      <label for="civil_id_number" class="form-label">Passport/ID Number:</label>
+                      <input type="text" class="form-control" id="civil_id_number" name="civil_id_number" value="<%= funjumper.civil_id_number %>" required>
+                  </div>
+      
+                  <div class="mb-3">
+                      <label for="civil_id_expires" class="form-label">Passport/ID Number Expire Date:</label>
+                      <input type="date" class="form-control" id="civil_id_expires" name="civil_id_expires" value="<%= funjumper.civil_id_expires ? funjumper.civil_id_expires.toISOString().split('T')[0] : null  %>" required>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="waiver_signed">Waiver Signed:</label>
+                    <select class="form-control" id="waiver_signed" name="waiver_signed">
+                      <option value="true" <%= funjumper.waiver_signed ? 'selected' : '' %>>Yes</option>
+                      <option value="false" <%= !funjumper.waiver_signed ? 'selected' : '' %>>No</option>
+                    </select>
+                </div>
+
+
+          </div>
+      </div>
+
+      <hr/>
+
+      <div class="row">
+          <h2>Contact Information</h2>
+          <div class="col-md-6"> 
+                  <div class="mb-3">
+                      <label for="phone_number" class="form-label">Phone Number:</label>
+                      <input type="text" class="form-control" id="phone_number" name="phone_number" value="<%= funjumper.phone_number %>" required>
+                  </div>
+                  
+                  <div class="mb-3">
+                      <label for="email" class="form-label">Email:</label>
+                      <input type="text" class="form-control" id="email" name="email" value="<%= funjumper.email %>" required>
+                  </div>
+                  
+                  <div class="mb-3">
+                      <label for="street_address" class="form-label">Full Street Address:</label>
+                      <input type="text" class="form-control" id="street_address" name="street_address" value="<%= funjumper.street_address %>" required>
+                  </div>
+                  
+                  <div class="mb-3">
+                      <label for="city_address" class="form-label">City:</label>
+                      <input type="text" class="form-control" id="city_address" name="city_address" value="<%= funjumper.city_address %>" required>
+                  </div>
+                  
+                  <div class="mb-3">
+                      <label for="postal_code" class="form-label">Postal Code:</label>
+                      <input type="text" class="form-control" id="postal_code" name="postal_code" value="<%= funjumper.postal_code %>" required>
+                  </div>
+                  
+                  <div class="mb-3">
+                      <label for="country" class="form-label">Country:</label>
+                      <input type="text" class="form-control" id="country" name="country" value="<%= funjumper.country %>" required>
+                  </div>
+          </div>
+      </div>
+
+      <hr/>
+
+      <div class="row">
+          <h2>License & Insurance Information</h2>
+          <div class="col-md-6"> 
+
+                  <div class="mb-3">
+                      <label for="number_of_jumps" class="form-label">Total Number of Jumps:</label>
+                      <input type="number" class="form-control" id="number_of_jumps" name="number_of_jumps" value="<%= funjumper.number_of_jumps %>" required>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="license_issuer" class="form-label">License Issuer:</label>
+                      <input type="text" class="form-control" id="license_issuer" name="license_issuer" value="<%= funjumper.license_issuer %>" required>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="license_letter" class="form-label">License Letter:</label>
+                      <input type="text" class="form-control" id="license_letter" name="license_letter" value="<%= funjumper.license_letter %>" required>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="license_number" class="form-label">License Number:</label>
+                      <input type="text" class="form-control" id="license_number" name="license_number" value="<%= funjumper.license_number %>" required>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="license_expire" class="form-label">License Expires:</label>
+                      <input type="date" class="form-control" id="license_expire" name="license_expire" value="<%= funjumper.license_expire ? funjumper.license_expire.toISOString().split('T')[0] : null  %>" required>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="insurance_issuer" class="form-label">Insurance Issuer:</label>
+                      <input type="text" class="form-control" id="insurance_issuer" name="insurance_issuer" value="<%= funjumper.insurance_issuer %>" required>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="insurance_number" class="form-label">Insurance Number:</label>
+                      <input type="text" class="form-control" id="insurance_number" name="insurance_number" value="<%= funjumper.insurance_number %>" required>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="insurance_expire" class="form-label">Insurance Expires:</label>
+                      <input type="date" class="form-control" id="insurance_expire" name="insurance_expire" value="<%= funjumper.insurance_expire ? funjumper.insurance_expire.toISOString().split('T')[0] : null  %>" required>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="insurance_issuer_health" class="form-label">Health Insurance Issuer:</label>
+                      <input type="text" class="form-control" id="insurance_issuer_health" name="insurance_issuer_health" value="<%= funjumper.insurance_issuer_health %>" >
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="insurance_number_health" class="form-label">Health Insurance Number:</label>
+                      <input type="text" class="form-control" id="insurance_number_health" name="insurance_number_health" value="<%= funjumper.insurance_number_health %>" >
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="insurance_expire_health" class="form-label">Health Insurance Expires:</label>
+                      <input type="date" class="form-control" id="insurance_expire_health" name="insurance_expire_health" value="<%= funjumper.insurance_expire_health ? funjumper.insurance_expire_health.toISOString().split('T')[0] : null  %>" >
+                  </div>
+          </div>
+      </div>
+
+      <hr/>
+
+      <div class="row">
+          <h2>Rig and Equipment Information</h2>
+          <div class="col-md-6"> 
+                  <div class="mb-3">
+                      <label for="container_manufaturer" class="form-label">Container Manufacturer:</label>
+                      <input type="text" class="form-control" id="container_manufaturer" name="container_manufaturer" value="<%= funjumper.container_manufaturer %>" >
+                  </div>
+                   
+                  <div class="mb-3">
+                      <label for="canopy_brand_type" class="form-label">Main Brand & Type:</label>
+                      <input type="text" class="form-control" id="canopy_brand_type" name="canopy_brand_type" value="<%= funjumper.canopy_brand_type %>" >
+                  </div>
+                   
+                  <div class="mb-3">
+                      <label for="canopy_size" class="form-label">Main Size (sqft):</label>
+                      <input type="number" class="form-control" id="canopy_size" name="canopy_size" value="<%= funjumper.canopy_size %>" >
+                  </div>
+                   
+                  <div class="mb-3">
+                      <label for="reserve_brand" class="form-label">Reserve Brand & Type:</label>
+                      <input type="text" class="form-control" id="reserve_brand" name="reserve_brand" value="<%= funjumper.reserve_brand %>" >
+                  </div>
+                   
+                  <div class="mb-3">
+                      <label for="reserve_size" class="form-label">Reserve Size (sqft):</label>
+                      <input type="number" class="form-control" id="reserve_size" name="reserve_size" value="<%= funjumper.reserve_size %>" >
+                  </div>
+                   
+                  <div class="mb-3">
+                      <label for="repack_duedate" class="form-label">Repack Duedate:</label>
+                      <input type="date" class="form-control" id="repack_duedate" name="repack_duedate" value="<%= funjumper.repack_duedate ? funjumper.repack_duedate.toISOString().split('T')[0] : null  %>" >
+                  </div>
+          </div>
+      </div>
+
+      <hr/>
+
+      <div class="row">
+          <h2>Emergency Contact Information</h2>
+          <div class="col-md-6"> 
+              <div class="mb-3">
+                  <label for="emergency_contact_name" class="form-label">Emergency Contact Name:</label>
+                  <input type="text" class="form-control" id="emergency_contact_name" name="emergency_contact_name" value="<%= funjumper.emergency_contact_name %>" required>
+              </div>
+
+              <div class="mb-3">
+                  <label for="emergency_contact_relation" class="form-label">Emergency Contact Relation:</label>
+                  <input type="text" class="form-control" id="emergency_contact_relation" name="emergency_contact_relation" value="<%= funjumper.emergency_contact_relation %>" required>
+              </div>
+
+              <div class="mb-3">
+                  <label for="emergency_contact_phone" class="form-label">Emergency Contact Phone:</label>
+                  <input type="text" class="form-control" id="emergency_contact_phone" name="emergency_contact_phone" value="<%= funjumper.emergency_contact_phone %>" required>
+              </div>
+              
+              <div class="mb-3">
+                  <label for="emergency_contact_email" class="form-label">Emergency Contact Email:</label>
+                  <input type="text" class="form-control" id="emergency_contact_email" name="emergency_contact_email" value="<%= funjumper.emergency_contact_email %>">
+              </div>
+          </div>
+      </div>
+  
+      <button type="submit" class="btn btn-primary">Update</button>
+  </form>
+</div>
+
+<script>
+  const form = document.querySelector('form');
+  const submitButton = form.querySelector('button[type="submit"]');
+
+  form.addEventListener('submit', (event) => {
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...';
+  });
+
+  form.addEventListener('reset', () => {
+    submitButton.disabled = false;
+    submitButton.innerHTML = 'Update'; 
+  }); 
+
+  async function copyToClipboard() {
+    try {
+      const el = document.getElementById('editLink');
+      await navigator.clipboard.writeText(el.value);
+      // Optionally provide user feedback (e.g., a tooltip)
+      alert('Link copied to clipboard!'); 
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+      alert('Failed to copy link to clipboard.'); 
+    }
+  }
+</script>

@@ -1,0 +1,80 @@
+<% if (errors && errors.length > 0) { %>
+    <div class="alert alert-danger">
+      <ul>
+        <% errors.forEach(error => { %>
+          <li><%= error %></li>
+        <% }); %>
+      </ul>
+    </div>
+  <% } %>
+
+<div class="container-fluid">
+    <form action="/register/new-airplane" method="POST">
+        <div class="row">
+            <div class="col-md-8"> 
+                <div class="mb-3">
+                    <label for="tail_number" class="form-label">Tail Number:</label>
+                    <input type="text" class="form-control" id="tail_number" name="tail_number" required>
+                </div>
+
+                <div class="mb-3">
+                  <label for="serial_number" class="form-label">Serial Number:</label>
+                  <input type="text" class="form-control" id="serial_number" name="serial_number" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="aircraft_type" class="form-label">Aircraft Type:</label>
+                    <input type="text" class="form-control" id="aircraft_type" name="aircraft_type" required>
+                </div>
+
+                <div class="mb-3">
+                  <label for="max_passengers" class="form-label">Maximum Passegers (inc. Pilot):</label>
+                  <input type="text" class="form-control" id="max_passengers" name="max_passengers" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="slots" class="form-label">Available Slots:</label>
+                    <input type="text" class="form-control" id="slots" name="slots" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="flight_hours" class="form-label">Fligth Hours:</label>
+                    <input type="text" class="form-control" id="flight_hours" name="flight_hours" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="last_maintenance" class="form-label">Last Maintenance Date:</label>
+                    <input type="date" class="form-control" id="last_maintenance" name="last_maintenance" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="maintenance_interval" class="form-label">Maintenance Interval (hours):</label>
+                    <input type="text" class="form-control" id="maintenance_interval" name="maintenance_interval" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="rating" class="form-label">Required Ratings:</label>
+                    <input type="text" class="form-control" id="rating" name="rating" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="engine_type" class="form-label">Engine Type:</label>
+                    <input type="text" class="form-control" id="engine_type" name="engine_type" required>
+                </div>
+
+                <div class="mb-3">
+                  <label for="fuel_type" class="form-label">Fuel Type:</label>
+                  <input type="text" class="form-control" list="fuelTypes" id="fuel_type" name="fuel_type" required> 
+                  <datalist id="fuelTypes">
+                    <% fuelTypes.forEach(fuelType => { %>
+                      <option value="<%= fuelType %>"></option>
+                    <% }); %>
+                  </datalist>
+                </div>
+
+            </div>
+        </div>
+    
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+  </div>

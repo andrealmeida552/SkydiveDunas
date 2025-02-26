@@ -1,0 +1,130 @@
+<% if (errors && errors.length > 0) { %>
+    <div class="alert alert-danger">
+      <ul>
+        <% errors.forEach(error => { %>
+          <li><%= error %></li>
+        <% }); %>
+      </ul>
+    </div>
+  <% } %>
+
+<div class= "container-fluid table-responsive">
+
+    <h1>List of Airplanes</h1>
+
+    <table id="airplanesTable" class="table table-sm table-striped table-bordered table-hover">
+        <thead>
+        <tr>
+            <th onclick="sortTable(0)">↕ Airplane ID</th>
+            <th onclick="sortTable(1)">↕ Tail Number</th> 
+            <th onclick="sortTable(2)">↕ Serial Number</th>
+            <th onclick="sortTable(3)">↕ Aircraft Type</th> 
+            <th onclick="sortTable(4)">↕ Max Passengers</th> 
+            <th onclick="sortTable(5)">↕ Slots</th> 
+            <th onclick="sortTable(6)">↕ Fligth Hours</th> 
+            <th onclick="sortTable(7)">↕ Last Maintenance Date</th> 
+            <th onclick="sortTable(8)">↕ Maintenance Interval (hrs)</th> 
+            <th onclick="sortTable(9)">↕ Rating Required</th> 
+            <th onclick="sortTable(10)">↕ Enginge Type</th> 
+            <th onclick="sortTable(11)">↕ Fuel Id Type</th> 
+        </tr>
+        <tr>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(0)" placeholder="Search ID"> <button type="button" onclick="clearFilter(0)">Clear</button></th>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(1)" placeholder="Search Tail"> <button type="button" onclick="clearFilter(1)">Clear</button></th>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(2)" placeholder="Search Serial"> <button type="button" onclick="clearFilter(2)">Clear</button></th>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(3)" placeholder="Search Airplane"> <button type="button" onclick="clearFilter(3)">Clear</button></th>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(4)" placeholder="Search Max Pax."> <button type="button" onclick="clearFilter(4)">Clear</button></th>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(5)" placeholder="Search Slots"> <button type="button" onclick="clearFilter(5)">Clear</button></th>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(6)" placeholder="Search Fligth Hours"> <button type="button" onclick="clearFilter(6)">Clear</button></th>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(7)" placeholder="Search Last Maint. Date"> <button type="button" onclick="clearFilter(7)">Clear</button></th>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(8)" placeholder="Search Interval"> <button type="button" onclick="clearFilter(8)">Clear</button></th>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(9)" placeholder="Search Ratings"> <button type="button" onclick="clearFilter(9)">Clear</button></th>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(10)" placeholder="Search Engine"> <button type="button" onclick="clearFilter(10)">Clear</button></th>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(11)" placeholder="Search Fuel ID"> <button type="button" onclick="clearFilter(11)">Clear</button></th>
+        </tr>
+        </thead>
+        <tbody>
+        <% listContent.forEach(Aircraft => { %>
+            <tr>
+            <td scope="row"><%= Aircraft.airplane_id %></td> 
+            <td><%= Aircraft.tail_number %></td> 
+            <td><%= Aircraft.serial_number %></td> 
+            <td><%= Aircraft.aircraft_type %></td> 
+            <td><%= Aircraft.max_passengers %></td> 
+            <td><%= Aircraft.slots %></td> 
+            <td><%= Aircraft.flight_hours %></td> 
+            <td><%= new Date(Aircraft.last_maintenance).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td> 
+            <td><%= Aircraft.maintenance_interval %></td> 
+            <td><%= Aircraft.rating %></td> 
+            <td><%= Aircraft.engine_type %></td> 
+            <td><%= Aircraft.fuel_type_id %></td> 
+            </tr>
+        <% }); %>
+        </tbody>
+    </table>
+
+  </div>
+
+  <script>
+    function sortTable(n) {
+      var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+      table = document.getElementById("airplanesTable");
+      switching = true;
+      dir = "asc"; 
+      while (switching) {
+        switching = false;
+        rows = table.rows;
+        for (i = 1; i < (rows.length - 1); i++) {
+          shouldSwitch = false;
+          x = rows[i].getElementsByTagName("TD")[n];
+          y = rows[i + 1].getElementsByTagName("TD")[n];
+          if (dir == "asc") {
+            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+              shouldSwitch= true;
+              break;
+            }
+          } else if (dir == "desc") {
+            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+              shouldSwitch= true;
+              break;
+            }
+          }
+        }
+        if (shouldSwitch) {
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+          switching = true;
+          switchcount ++;
+        } else {
+          if (switchcount == 0 && dir == "asc") {
+            dir = "desc";
+            switching = true;
+          }
+        }
+      }
+    }
+
+    function filterTable(n) {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementsByTagName('input')[n]; 
+        filter = input.value.toUpperCase();
+        table = document.getElementById("airplanesTable");
+        tr = table.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+          td = tr[i].getElementsByTagName("td")[n]; 
+          if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+              tr[i].style.display = "";
+            } else {
+              tr[i].style.display = "none";
+            }
+          }       
+        }
+      }
+
+      function clearFilter(n) {
+        var input = document.getElementsByTagName('input')[n];
+        input.value = ""; // Clear the input field
+        filterTable(n); // Re-filter the table with empty search term
+      }
+  </script>

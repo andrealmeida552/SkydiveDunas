@@ -1,0 +1,58 @@
+[
+    {
+        "label": "Operation",
+        "url": "/",
+        "submenu": [
+            { "label": "Dashboard", "url": "/operation/loads-dashboard" },
+            { "label": "New Load", "url": "/operation/new-load" },
+            { "label": "Manifest", "url": "/operation/manifest" },
+            { "label": "Refuel", "url": "/operation/refuel" }
+        ]
+    },
+    {
+        "label": "Tandem",
+        "url": "/",
+        "submenu": [
+            { "label": "Checkin", "url": "/tandem/checkin" },
+            { "label": "Passengers", "url": "/tandem/list-passengers" },
+            { "label": "Other", "url": "/tandem/other" }
+        ]
+    },
+    {
+        "label": "Transactions",
+        "url": "/",
+        "submenu": [
+            { "label": "New Transaction", "url": "/transactions/new" },
+            { "label": "List Transactions", "url": "/lists/transactions" }
+        ]
+    },
+    {
+        "label": "Register",
+        "url": "/",
+        "submenu": [
+            { "label": "New User", "url": "/register/new-user" },
+            { "label": "New FunJumper", "url": "/register/new-funjumper" },
+            { "label": "New Instructor", "url": "/register/new-instructor" },
+            { "label": "New Pilot", "url": "/register/new-pilot" },
+            { "label": "New Airplane", "url": "/register/new-airplane" },
+            { "label": "New Fuel Type", "url": "/register/new-fuel-type" },
+            { "label": "New Jump Type", "url": "/register/new-jump-type" }
+        ]
+    },
+    {
+        "label": "Lists",
+        "url": "/",
+        "submenu": [
+            { "label": "Users", "url": "/lists/users" },
+            { "label": "FunJumpers", "url": "/lists/funjumpers" },
+            { "label": "Instructors", "url": "/lists/instructors" },
+            { "label": "Pilots", "url": "/lists/pilots" },
+            { "label": "Fuel Types", "url": "/lists/fuel-types" },
+            { "label": "Airplanes", "url": "/lists/airplanes" },
+            { "label": "Jump Types", "url": "/lists/jump-types" },
+            { "label": "Refuels", "url": "/lists/refuels" },
+            { "label": "Loads", "url": "/lists/loads" },
+            { "label": "Jumps", "url": "/lists/jumps" }
+        ]
+    }
+]

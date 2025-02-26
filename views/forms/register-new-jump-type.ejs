@@ -1,0 +1,30 @@
+<% if (errors && errors.length > 0) { %>
+    <div class="alert alert-danger">
+      <ul>
+        <% errors.forEach(error => { %>
+          <li><%= error %></li>
+        <% }); %>
+      </ul>
+    </div>
+  <% } %>
+
+<div class="container-fluid">
+    <form action="/register/new-jump-type" method="POST">
+        <div class="row">
+            <div class="col-md-8"> 
+                <div class="mb-3">
+                    <label for="jump_name" class="form-label">Jump Name:</label>
+                    <input type="text" class="form-control" id="jump_name" name="jump_name" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="height_feet" class="form-label">Exit Heigh, in Feet:</label>
+                    <input type="text" class="form-control" id="height_feet" name="height_feet" required>
+                </div>
+                </div>
+            </div>
+        </div>
+    
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+  </div>
