@@ -58,9 +58,9 @@
             <td><%= Instructor.tandem_rating === "1" ? 'Yes' : 'No' %></td>
             <td><%= Instructor.camera_rating === "1" ? 'Yes' : 'No' %></td>
             <td><%= Instructor.license_number %></td> 
-            <td><%= new Date(Instructor.license_expiration).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td> 
-            <td><%= new Date(Instructor.insurance_expiration).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td> 
-            <td><%= new Date(Instructor.civil_id_expiration).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td> 
+            <td><%= new Date(Instructor.license_expire).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td> 
+            <td><%= new Date(Instructor.insurance_expire).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td> 
+            <td><%= new Date(Instructor.civil_id_expires).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td> 
             <td><%= Instructor.emergency_contact_name %></td> 
             <td><%= Instructor.emergency_contact_relation %></td> 
             <td><%= Instructor.emergency_contact_phone %></td> 
