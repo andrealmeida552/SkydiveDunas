@@ -1297,7 +1297,7 @@ app.get('/lists/loads', isLoggedIn, hasRoleLevel(2), async (req, res) => {
 });
 // List all transactions
 app.get('/lists/transactions', isLoggedIn, hasRoleLevel(2), async (req, res) => { 
-  try {
+  try { // FIXME - Not capturing or saving the information of tandem jumps, instructors and photos/videos correclty.
     const [rows] = await pool.execute(`
       SELECT 
           t.transaction_id, 
@@ -1308,16 +1308,29 @@ app.get('/lists/transactions', isLoggedIn, hasRoleLevel(2), async (req, res) => 
           CONCAT(f.first_name, ' ', f.last_name) AS funjumper_name,
           CONCAT(p.first_name, ' ' , p.last_name) AS pilot_name, 
           t.amount, 
-          t.notes 
+          t.notes,
+          t.tandem_id,
+          passengers.first_name AS passenger_first_name,
+          passengers.last_name AS passenger_last_name,
+          ti_fj.first_name AS instructor_first_name,
+          ti_fj.last_name AS instructor_last_name
       FROM 
           transactions t
       LEFT JOIN 
           fun_jumpers f ON t.funjumper_id = f.funjumper_id
       LEFT JOIN 
           pilots p ON t.pilot_id = p.pilot_id
+      LEFT JOIN
+          tandems ON t.tandem_id = tandems.tandem_id
+      LEFT JOIN
+          passengers ON tandems.passenger_id = passengers.passenger_id
+      LEFT JOIN
+          tandem_instructors ti ON tandems.tandem_instructor_id = ti.tandem_instructor_id
+      LEFT JOIN
+          fun_jumpers ti_fj ON ti.funjumper_id = ti_fj.funjumper_id
       ORDER BY 
           t.transaction_datetime DESC;
-    `); 
+    `);  
     res.render('index', { 
       title: 'List Transactions',
       page: 'list-transactions',

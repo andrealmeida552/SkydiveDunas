@@ -48,9 +48,6 @@
             <td><%= new Date(transaction.transaction_datetime).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td> 
             <td><%= new Date(transaction.transaction_datetime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) %></td>
             <td><%= transaction.transaction_type %></td>
-            <!-- <td><% if (transaction.tandemjumper_id) { %>
-                <%= transaction.tandemjumper_name %> 
-              <% } %></td> -->
             <td> </td> <!-- Replace when tandemjumper table is build-->
             <td><%= transaction.funjumper_id %> </td> 
             <td><%= transaction.funjumper_name %> </td> 
