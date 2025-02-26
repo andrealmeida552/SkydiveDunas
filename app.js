@@ -70,20 +70,19 @@ async function createTransaction(transactionData) {
     // Insert transaction data into the database
     const [result] = await pool.execute(`
       INSERT INTO transactions 
-      (transaction_type, funjumper_id, pilot_id, tandemjumper_id, amount, notes, transaction_datetime) 
+      (transaction_type, funjumper_id, pilot_id, tandem_id, amount, notes, transaction_datetime) 
       VALUES (?, ?, ?, ?, ?, ?, NOW())
     `, [
       transactionData.transaction_type,
       transactionData.funjumper_id,
       transactionData.pilot_id,
-      transactionData.tandemjumper_id,
+      transactionData.tandem_id,
       transactionData.amount,
       transactionData.notes
     ]);
 
     // Update funjumper's jump_ticket_balance if necessary
-    if (transactionData.transaction_type === 'jump' || transactionData.transaction_type === 'cancel_jump'
-        || transactionData.transaction_type === 'buy_jumpticket' || transactionData.transaction_type === 'cancel_jumpticket') {
+    if (transactionData.transaction_type === 'jump' || transactionData.transaction_type === 'cancel_jump') {
       const [jumpticket_balanceResult] = await pool.execute(`
         SELECT SUM(CASE WHEN t.transaction_type IN ('jump', 'cancel_jump', 'buy_jumpticket', 'cancel_jumpticket') THEN t.amount ELSE 0 END) AS balance
         FROM transactions t
@@ -97,23 +96,6 @@ async function createTransaction(transactionData) {
         SET jump_ticket_balance = ?
         WHERE funjumper_id = ?
       `, [jumpticket_newBalance, transactionData.funjumper_id]);
-    }
-
-    // Update funjumper's money balance if necessary
-    if (transactionData.transaction_type === 'balance_in' || transactionData.transaction_type === 'balance_out') {
-      const [money_balanceResult] = await pool.execute(`
-        SELECT SUM(CASE WHEN t.transaction_type IN ('balance_in', 'balance_out') THEN t.amount ELSE 0 END) AS balance
-        FROM transactions t
-        WHERE t.funjumper_id = ?
-      `, [transactionData.funjumper_id]);
-
-      const money_newBalance = money_balanceResult[0].balance; 
-
-      await pool.execute(`
-        UPDATE fun_jumpers
-        SET balance = ?
-        WHERE funjumper_id = ?
-      `, [money_newBalance, transactionData.funjumper_id]);
     }
 
     // Commit the transaction
@@ -200,7 +182,7 @@ app.post('/api/loads/:loadId/add-funjumper', isLoggedIn, hasRoleLevel(5), async 
       transaction_type: 'jump',
       funjumper_id: funjumperId,
       pilot_id: null,
-      tandemjumper_id: null,
+      tandem_id: null,
       amount: -1,
       notes: `Jump ticket used for Load ${loadId}`
     };
@@ -327,8 +309,13 @@ app.get('/api/search/passengers', isLoggedIn, hasRoleLevel(5), async (req, res) 
         passenger_id, 
         first_name, 
         last_name 
-      FROM passengers
-      WHERE CONCAT(first_name, ' ', last_name) LIKE ?
+      FROM passengers p
+      WHERE CONCAT(first_name, ' ', last_name) LIKE ? 
+      AND p.passenger_id IN (
+        SELECT t.passenger_id
+        FROM tandems t
+        WHERE t.tandem_instructor_id IS NULL
+      );
     `, [`%${searchTerm}%`]);
 
     res.json(results);
@@ -390,6 +377,54 @@ app.post('/api/loads/:loadId/add-tandem', isLoggedIn, hasRoleLevel(5), async (re
       VALUES (?, ?, ?)
     `, [loadId, tandemId, notes || null]);
 
+    //4. Create transaction for this instructor
+    await createTransaction({
+      transaction_type: 'tandem_jump',
+      funjumper_id: null,
+      pilot_id: null,
+      tandem_id: instructorId,
+      amount: +1,
+      notes: `Tandem Instructor on load ${loadId} with passenger ${passengerId}`
+    });
+
+    // Retrieve photos and videos from the tandem entry
+    const [tandemData] = await pool.execute(`
+      SELECT photos, videos
+      FROM tandems
+      WHERE passenger_id = ?
+      ORDER BY tandem_id DESC
+      LIMIT 1
+    `, [passengerId]);
+
+    if (!tandemData || tandemData.length === 0) {
+      return res.status(404).json({ success: false, message: 'Tandem data not found.' });
+    }
+
+    const { photos, videos } = tandemData[0];
+
+    if (photos === 1) {
+      await createTransaction({
+        transaction_type: 'tandem_photos',
+        funjumper_id: passengerId,
+        pilot_id: null,
+        tandem_id: instructorId,
+        amount: +1,
+        notes: `Tandem photos on load ${loadId} with passenger ${passengerId}`
+      });
+    }
+
+    if (videos === 1) {
+      await createTransaction({
+        transaction_type: 'tandem_videos',
+        funjumper_id: passengerId,
+        pilot_id: null,
+        tandem_id: instructorId,
+        amount: +1,
+        notes: `Tandem video on load ${loadId} with passenger ${passengerId}`
+      });
+    }
+
+
     res.status(200).json({ success: true, message: 'Tandem added to load successfully.' });
 
   } catch (error) {
@@ -434,7 +469,7 @@ app.delete('/api/loads/:loadId/remove-funjumper/:jumpId', isLoggedIn, hasRoleLev
       transaction_type: 'cancel_jump',
       funjumper_id: funjumperId,
       pilot_id: null,
-      tandemjumper_id: null,
+      tandem_id: null,
       amount: +1,
       notes: `Taken out of manifest from Load ${loadId}`
     };
@@ -461,6 +496,11 @@ app.delete('/api/loads/:loadId/remove-tandem/:tandemId', isLoggedIn, hasRoleLeve
     await pool.execute(`
       DELETE FROM jumps WHERE tandem_id = ? AND load_id = ?
     `, [tandemId, loadId]);
+
+    // Set tandem_instructor_id to NULL in the tandems table
+    await pool.execute(`
+      UPDATE tandems SET tandem_instructor_id = NULL WHERE tandem_id = ?
+    `, [tandemId]);
 
     res.status(200).json({ success: true, message: 'Tandem removed from load successfully.' });
 
@@ -1216,7 +1256,14 @@ app.get('/lists/loads', isLoggedIn, hasRoleLevel(2), async (req, res) => {
               WHEN l.status = 1 THEN 'Active' 
               ELSE 'Inactive' 
           END AS status, 
-          (SELECT COUNT(*) FROM jumps WHERE jumps.load_id = l.load_id) AS occupancy, 
+          (SELECT 
+              SUM(CASE 
+                  WHEN j.tandem_id IS NOT NULL THEN 2 
+                  ELSE 1 
+              END) 
+            FROM jumps j 
+            WHERE j.load_id = l.load_id
+          ) AS occupancy, 
           a.slots, 
           l.notes 
       FROM 
@@ -2667,7 +2714,7 @@ app.post('/transactions/create/funjumper', isLoggedIn, hasRoleLevel(2),
     check('funjumper_id').notEmpty().withMessage('Funjumper information is required'),
     check('funjumper_id').isInt({min:0}).withMessage('Invalid Funjumper ID'),
     check('transaction_type').notEmpty().withMessage('Transaction Type is required'),
-    check('transaction_type').isIn(['balance_in', 'buy_jumpticket', 'balance_out', 'cancel_jumpticket', 'jump', 'cancel_jump', 'other']).withMessage('Invalid Transaction Type'),
+    check('transaction_type').isIn(['buy_jumpticket','cancel_jumpticket', 'jump', 'cancel_jump', 'other']).withMessage('Invalid Transaction Type'),
     check('amount').notEmpty().withMessage('Amount is required'),
     check('amount').isFloat({min:0}).withMessage('Amount must be a non-negative number')
   ],
@@ -2691,77 +2738,20 @@ app.post('/transactions/create/funjumper', isLoggedIn, hasRoleLevel(2),
 
     try {
       const { funjumperSearch, funjumper_id, transaction_type, amount, notes } = req.body;
-  
-      if (transaction_type === 'balance_in') { // Deposit of money on funjumper balance account
-        const transactionData = {
-          transaction_type: transaction_type, 
-          funjumper_id: funjumper_id, 
-          pilot_id: null,
-          tandemjumper_id: null,
-          amount: +amount, 
-          notes: notes
-        };
-        const transactionId = await createTransaction(transactionData);
-        const successMessage = [`${funjumperSearch} account`,
-                                  `Deposit of ${transactionData.amount} Euros` ,
-                                  'Transaction created successfully.', 
-                                  `Transaction ID: ${transactionId}`];
-        return res.status(201).render('index', { 
-          title: 'New Transaction',
-          page: 'new-transaction',
-          menuItems: menuItems,
-          errors: '',
-          success: successMessage,
-          user: req.session.user
-        });
-      }
 
       if (transaction_type === 'buy_jumpticket') { // Transform Balance money into jumptickets
         const transactionDataTickets = {
           transaction_type: transaction_type, 
           funjumper_id: funjumper_id, 
           pilot_id: null,
-          tandemjumper_id: null,
+          tandem_id: null,
           amount: +amount, 
           notes: notes
         };
-        const transactionDataBalance = {
-          transaction_type: 'balance_out', 
-          funjumper_id: funjumper_id, 
-          pilot_id: null,
-          tandemjumper_id: null,
-          amount: -amount * JUMP_TICKET_PRICE, // FIXME - Change this to a Database value - Tabela de Precos!
-          notes: notes
-        };
         const transactionIdBalance = await createTransaction(transactionDataTickets);
-        const transactionIdTickets = await createTransaction(transactionDataBalance);
         const successMessage = [`${funjumperSearch} account`,
                           'Transaction created successfully.', 
-                          `Money Balance ${transactionDataBalance.amount} transformed into ${transactionDataTickets.amount} Jump Tickets`,
-                          `Transaction IDs: \n Balance: ${transactionIdBalance} \n Tickets: ${transactionIdTickets}`];
-        return res.status(201).render('index', { 
-          title: 'New Transaction',
-          page: 'new-transaction',
-          menuItems: menuItems,
-          errors: '',
-          success: successMessage,
-          user: req.session.user
-        });
-      }
-      
-      if (transaction_type === 'balance_out') { // Return money to funjumper from his/her account!
-        const transactionDataBalance = {
-          transaction_type: transaction_type, 
-          funjumper_id: funjumper_id, 
-          pilot_id: null,
-          tandemjumper_id: null,
-          amount: -amount, 
-          notes: notes
-        };
-        const transactionIdBalance = await createTransaction(transactionDataBalance);
-        const successMessage = [`${funjumperSearch} account`,
-                          'Transaction created successfully.', 
-                          `Money Balance ${transactionDataBalance.amount} returned to funjumper`,
+                          `${transactionDataTickets.amount} New Jump Tickets`,
                           `Transaction IDs: ${transactionIdBalance}`];
         return res.status(201).render('index', { 
           title: 'New Transaction',
@@ -2778,24 +2768,15 @@ app.post('/transactions/create/funjumper', isLoggedIn, hasRoleLevel(2),
           transaction_type: transaction_type, 
           funjumper_id: funjumper_id, 
           pilot_id: null,
-          tandemjumper_id: null,
+          tandem_id: null,
           amount: -amount, 
           notes: notes
         };
-        const transactionDataBalance = {
-          transaction_type: 'balance_in', 
-          funjumper_id: funjumper_id, 
-          pilot_id: null,
-          tandemjumper_id: null,
-          amount: +amount * JUMP_TICKET_PRICE, // FIXME - Change this to a Database value - Tabela de Precos!
-          notes: notes
-        };
         const transactionIdBalance = await createTransaction(transactionDataTickets);
-        const transactionIdTickets = await createTransaction(transactionDataBalance);
         const successMessage = [ `${funjumperSearch} account`,
                           'Transaction created successfully.', 
-                          `${transactionDataTickets.amount} Jump Tickets transformed into Money Balance ${transactionDataBalance.amount}`,
-                          `Transaction IDs: \n Tickets: ${transactionIdTickets}\n Balance: ${transactionIdBalance}`];
+                          `Removed ${transactionDataTickets.amount} Jump Tickets`,
+                          `Transaction IDs: ${transactionIdBalance}`];
         return res.status(201).render('index', { 
           title: 'New Transaction',
           page: 'new-transaction',

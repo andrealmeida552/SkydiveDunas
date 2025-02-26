@@ -46,7 +46,7 @@
             <td><%= new Date(load.takeoff_datetime).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
             <td><%= new Date(load.takeoff_datetime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) %></td>
             <td><%= load.status %></td>
-            <td><%= load.occupancy %> / <%= load.slots %></td>
+            <td><%= load.occupancy === null ? '0' : load.occupancy %> / <%= load.slots %></td>
             <td><%= load.notes %></td>
             <td><a href="/operation/manifest/details/<%= load.load_id %>" class="btn btn-sm btn-primary">View</a></td>
             </tr>
