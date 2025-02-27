@@ -1740,7 +1740,7 @@ app.get('/tandem/list-passengers', isLoggedIn, hasRoleLevel(2), async (req, res)
 app.get('/lists/instructors', isLoggedIn, hasRoleLevel(2), async (req, res) => { 
   try {
     
-    // [ ] Add here the jump, photos and videos balance
+    // [x] Add here the jump, photos and videos balance
     const [refuels] = await pool.execute(`
       SELECT 
           ti.tandem_instructor_id AS tandem_instructor_id,
@@ -1750,6 +1750,8 @@ app.get('/lists/instructors', isLoggedIn, hasRoleLevel(2), async (req, res) => {
           fj.date_of_birth AS date_of_birth,
           fj.phone_number AS phone_number,
           ti.jump_balance AS jump_balance,
+          ti.photos_balance AS photos_balance,
+          ti.videos_balance AS videos_balance,
           ti.tandem_rating AS tandem_rating,
           ti.camera_rating AS camera_rating,
           fj.license_number AS license_number,

@@ -20,15 +20,17 @@
             <th onclick="sortTable(2)">↕ Date of Birth</th> 
             <th onclick="sortTable(3)">↕ Phone Number</th> 
             <th onclick="sortTable(4)">↕ Tandem Balance Jumps</th> 
-            <th onclick="sortTable(5)">↕ Tandem Rating</th> 
-            <th onclick="sortTable(6)">↕ Tandem Camera Rating</th> 
-            <th onclick="sortTable(7)">↕ License Number</th> 
-            <th onclick="sortTable(8)">↕ License Expiration Date</th> 
-            <th onclick="sortTable(9)">↕ Insurance Expiration Date</th> 
-            <th onclick="sortTable(10)">↕ Civil ID Expiration Date</th> 
-            <th onclick="sortTable(11)">↕ Emergency Contact Name</th> 
-            <th onclick="sortTable(12)">↕ Emergency Contact Relation</th> 
-            <th onclick="sortTable(13)">↕ Emergency Contact Phone</th> 
+            <th onclick="sortTable(5)">↕ Tandem Photos</th>
+            <th onclick="sortTable(6)">↕ Tandem Videos</th>
+            <th onclick="sortTable(7)">↕ Tandem Rating</th> 
+            <th onclick="sortTable(8)">↕ Tandem Camera Rating</th> 
+            <th onclick="sortTable(9)">↕ License Number</th> 
+            <th onclick="sortTable(10)">↕ License Expiration Date</th> 
+            <th onclick="sortTable(11)">↕ Insurance Expiration Date</th> 
+            <th onclick="sortTable(12)">↕ Civil ID Expiration Date</th> 
+            <th onclick="sortTable(13)">↕ Emergency Contact Name</th> 
+            <th onclick="sortTable(14)">↕ Emergency Contact Relation</th> 
+            <th onclick="sortTable(15)">↕ Emergency Contact Phone</th> 
         </tr>
         <tr>
             <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(0)" placeholder="Search"> <button type="button" onclick="clearFilter(0)">Clear</button></th>
@@ -45,6 +47,8 @@
             <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(11)" placeholder="Search"> <button type="button" onclick="clearFilter(11)">Clear</button></th>
             <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(12)" placeholder="Search"> <button type="button" onclick="clearFilter(12)">Clear</button></th>
             <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(13)" placeholder="Search"> <button type="button" onclick="clearFilter(13)">Clear</button></th>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(13)" placeholder="Search"> <button type="button" onclick="clearFilter(14)">Clear</button></th>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(13)" placeholder="Search"> <button type="button" onclick="clearFilter(15)">Clear</button></th>
         </tr>
         </thead>
         <tbody>
@@ -55,6 +59,8 @@
             <td><%= new Date(Instructor.date_of_birth).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td> 
             <td><%= Instructor.phone_number %></td> 
             <td><%= Instructor.jump_balance %></td> 
+            <td><%= Instructor.photos_balance %></td> 
+            <td><%= Instructor.videos_balance %></td> 
             <td><%= Instructor.tandem_rating === "1" ? 'Yes' : 'No' %></td>
             <td><%= Instructor.camera_rating === "1" ? 'Yes' : 'No' %></td>
             <td><%= Instructor.license_number %></td> 
