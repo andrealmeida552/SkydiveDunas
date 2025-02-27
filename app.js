@@ -98,6 +98,88 @@ async function createTransaction(transactionData) {
       `, [jumpticket_newBalance, transactionData.funjumper_id]);
     }
 
+    // Update tandem instructor tandem_balance, photos and videos balance
+    // [ ] Test transaction records of balance of instructor jumps, photos and videos
+    if(transactionData.transaction_type === 'tandem_jump' || transactionData.transaction_type === 'cancel_tandem_jump') {
+      // 1. Retrieve funjumper_id from tandem_instructors using tandem_id
+      const [instructorData] = await pool.execute(`
+        SELECT ti.tandem_instructor_id
+        FROM tandems td
+        JOIN tandem_instructors ti ON td.tandem_instructor_id = ti.tandem_instructor_id
+        WHERE td.tandem_id = ?
+      `, [transactionData.tandem_id]);
+
+      if (instructorData && instructorData.length > 0 && instructorData[0].tandem_instructor_id) {
+        const instructorId = instructorData[0].tandem_instructor_id;
+
+        // 2. Calculate tandem jump balance using funjumper_id
+        const [tandem_jumps_balanceResult] = await pool.execute(`
+          SELECT 
+            SUM(CASE WHEN t.transaction_type IN ('tandem_jump', 'cancel_tandem_jump') THEN t.amount ELSE 0 END) AS balance
+          FROM transactions t
+          JOIN tandems td ON t.tandem_id = td.tandem_id
+          WHERE td.tandem_instructor_id = ?
+        `, [instructorId]);
+
+        const tandem_jumps_newBalance = tandem_jumps_balanceResult[0].balance;
+
+        // 3. Update the tandem_jump_balance in your fun_jumpers table
+        await pool.execute(`
+          UPDATE tandem_instructors
+          SET tandem_jumps = ?
+          WHERE tandem_instructor_id = ?
+        `, [tandem_jumps_newBalance, instructorId]);
+      } else {
+        console.error('Instructor not found for tandem_id:', transactionData.tandem_id);
+      }
+    }
+
+    if (['tandem_photos', 'tandem_videos', 'cancel_tandem_photos', 'cancel_tandem_videos'].includes(transactionData.transaction_type)) {
+      // 1. Retrieve tandem_instructor_id from tandem_instructors using tandem_id
+      const [instructorData] = await pool.execute(`
+        SELECT ti.tandem_instructor_id
+        FROM tandems td
+        JOIN tandem_instructors ti ON td.tandem_instructor_id = ti.tandem_instructor_id
+        WHERE td.tandem_id = ?
+      `, [transactionData.tandem_id]);
+    
+      if (instructorData && instructorData.length > 0 && instructorData[0].tandem_instructor_id) {
+        const instructorId = instructorData[0].tandem_instructor_id;
+    
+        let balanceColumn;
+        if (transactionData.transaction_type === 'tandem_photos' || transactionData.transaction_type === 'cancel_tandem_photos') {
+          balanceColumn = 'photos_balance';
+        } 
+        if (transactionData.transaction_type === 'tandem_videos' || transactionData.transaction_type === 'cancel_tandem_videos') {
+          balanceColumn = 'videos_balance';
+        }
+    
+        // 2. Calculate photo/video balance using tandem_instructor_id
+        const [balanceResult] = await pool.execute(`
+          SELECT 
+            SUM(CASE WHEN t.transaction_type IN (?, ?) THEN t.amount ELSE 0 END) AS balance
+          FROM transactions t
+          JOIN tandems td ON t.tandem_id = td.tandem_id
+          WHERE td.tandem_instructor_id = ?
+        `, [
+          transactionData.transaction_type === 'tandem_photos' || transactionData.transaction_type === 'cancel_tandem_photos' ? 'tandem_photos' : 'tandem_videos',
+          transactionData.transaction_type === 'tandem_photos' || transactionData.transaction_type === 'cancel_tandem_photos' ? 'cancel_tandem_photos' : 'cancel_tandem_videos',
+          instructorId
+        ]);
+    
+        const newBalance = balanceResult[0].balance;
+    
+        // 3. Update the photo/video balance in your tandem_instructors table
+        await pool.execute(`
+          UPDATE tandem_instructors
+          SET ${balanceColumn} = ?
+          WHERE tandem_instructor_id = ?
+        `, [newBalance, instructorId]);
+      } else {
+        console.error('Instructor not found for tandem_id:', transactionData.tandem_id);
+      }
+    }    
+
     // Commit the transaction
     await pool.query('COMMIT;');
 
@@ -352,7 +434,7 @@ app.post('/api/loads/:loadId/add-tandem', isLoggedIn, hasRoleLevel(5), async (re
     const { loadId } = req.params;
     const { passengerId, instructorId, notes } = req.body;
 
-    // 1. Find the appropriate tandem entry
+    // 1. Find the appropriate tandem entry, where there is no assigned tandem_instructor
     const [tandemEntries] = await pool.query(`
       SELECT tandem_id FROM tandems
       WHERE passenger_id = ? AND tandem_instructor_id IS NULL
@@ -1658,6 +1740,7 @@ app.get('/tandem/list-passengers', isLoggedIn, hasRoleLevel(2), async (req, res)
 app.get('/lists/instructors', isLoggedIn, hasRoleLevel(2), async (req, res) => { 
   try {
     
+    // [ ] Add here the jump, photos and videos balance
     const [refuels] = await pool.execute(`
       SELECT 
           ti.tandem_instructor_id AS tandem_instructor_id,
@@ -1918,7 +2001,7 @@ app.post('/register/new-funjumper', isLoggedIn, hasRoleLevel(2),
   }
 );
 // Updates the information related to a funjumper
-// FIXME - Set authentication required for this
+// [ ] - Set authentication required for this
 app.post('/funjumpers/:funjumperId/update', /* isLoggedIn, hasRoleLevel(2), */
   [
     // Personal Information
