@@ -487,7 +487,7 @@ app.post('/api/loads/:loadId/add-tandem', isLoggedIn, hasRoleLevel(5), async (re
     if (photos === 1) {
       await createTransaction({
         transaction_type: 'tandem_photos',
-        funjumper_id: passengerId,
+        funjumper_id: null,
         pilot_id: null,
         tandem_id: tandemId,
         amount: +1,
@@ -498,7 +498,7 @@ app.post('/api/loads/:loadId/add-tandem', isLoggedIn, hasRoleLevel(5), async (re
     if (videos === 1) {
       await createTransaction({
         transaction_type: 'tandem_videos',
-        funjumper_id: passengerId,
+        funjumper_id: null,
         pilot_id: null,
         tandem_id: tandemId,
         amount: +1,
@@ -1427,23 +1427,19 @@ app.get('/lists/loads', isLoggedIn, hasRoleLevel(2), async (req, res) => {
 });
 // List all transactions
 app.get('/lists/transactions', isLoggedIn, hasRoleLevel(2), async (req, res) => { 
-  try { // FIXME - Not capturing or saving the information of tandem jumps, instructors and photos/videos correclty.
+  try {
     const [rows] = await pool.execute(`
       SELECT 
           t.transaction_id, 
           t.transaction_datetime, 
           t.transaction_type,
           f.funjumper_id,
-          p.pilot_id, 
           CONCAT(f.first_name, ' ', f.last_name) AS funjumper_name,
-          CONCAT(p.first_name, ' ' , p.last_name) AS pilot_name, 
           t.amount, 
           t.notes,
           t.tandem_id,
-          passengers.first_name AS passenger_first_name,
-          passengers.last_name AS passenger_last_name,
-          ti_fj.first_name AS instructor_first_name,
-          ti_fj.last_name AS instructor_last_name
+          CONCAT(passengers.first_name, ' ', passengers.last_name) AS passenger_name,
+          CONCAT(ti_fj.first_name, ' ', ti_fj.last_name) AS instructor_name
       FROM 
           transactions t
       LEFT JOIN 

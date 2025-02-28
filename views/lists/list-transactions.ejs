@@ -19,13 +19,11 @@
             <th onclick="sortTable(1)">↕ Date</th> 
             <th onclick="sortTable(2)">↕ Hour</th> 
             <th onclick="sortTable(3)">↕ Type</th> 
-            <th onclick="sortTable(4)">↕ Tandem Jumper</th> 
-            <th onclick="sortTable(5)">↕ Fun Jumper ID</th> 
-            <th onclick="sortTable(6)">↕ Fun Jumper</th> 
-            <th onclick="sortTable(7)">↕ Pilot ID</th> 
-            <th onclick="sortTable(8)">↕ Pilot</th> 
-            <th onclick="sortTable(9)">↕ Amount</th> 
-            <th onclick="sortTable(10)">↕ Notes</th> 
+            <th onclick="sortTable(4)">↕ Tandem Passenger</th> 
+            <th onclick="sortTable(5)">↕ FunJumper ID</th> 
+            <th onclick="sortTable(6)">↕ Instructor/FunJumper</th> 
+            <th onclick="sortTable(7)">↕ Amount</th> 
+            <th onclick="sortTable(8)">↕ Notes</th> 
         </tr>
         <tr>
             <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(0)" placeholder="Search"> <button type="button" onclick="clearFilter(0)">Clear</button></th>
@@ -37,8 +35,6 @@
             <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(6)" placeholder="Search"> <button type="button" onclick="clearFilter(6)">Clear</button></th>
             <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(7)" placeholder="Search"> <button type="button" onclick="clearFilter(7)">Clear</button></th>
             <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(8)" placeholder="Search"> <button type="button" onclick="clearFilter(8)">Clear</button></th>
-            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(9)" placeholder="Search"> <button type="button" onclick="clearFilter(9)">Clear</button></th>
-            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(10)" placeholder="Search"> <button type="button" onclick="clearFilter(10)">Clear</button></th>
         </tr>
         </thead>
         <tbody>
@@ -48,11 +44,9 @@
             <td><%= new Date(transaction.transaction_datetime).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td> 
             <td><%= new Date(transaction.transaction_datetime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) %></td>
             <td><%= transaction.transaction_type %></td>
-            <td> </td> <!-- Replace when tandemjumper table is build-->
+            <td><%= transaction.passenger_name %> </td>
             <td><%= transaction.funjumper_id %> </td> 
-            <td><%= transaction.funjumper_name %> </td> 
-            <td><%= transaction.pilot_id %> </td> 
-            <td><%= transaction.pilot_name %> </td> 
+            <td><%= transaction.funjumper_name ? transaction.funjumper_name : transaction.instructor_name %></td>
             <td><%= transaction.amount %></td>
             <td><%= transaction.notes %></td>
             </tr>
