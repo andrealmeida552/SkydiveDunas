@@ -25,6 +25,7 @@
             <th onclick="sortTable(7)">↕ Emergency Contact Relation</th>
             <th onclick="sortTable(8)">↕ Emergency Contact Phone</th>
             <th onclick="sortTable(9)">↕ Waiver Signed</th>
+            <th onclick="sortTable(10)">↕ Multimedia</th>
         </tr>
         <tr>
             <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(0)" placeholder="Search"> <button type="button" onclick="clearFilter(0)">Clear</button></th>
@@ -37,6 +38,7 @@
             <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(7)" placeholder="Search"> <button type="button" onclick="clearFilter(7)">Clear</button></th>
             <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(8)" placeholder="Search"> <button type="button" onclick="clearFilter(8)">Clear</button></th>
             <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(9)" placeholder="Search"> <button type="button" onclick="clearFilter(9)">Clear</button></th>
+            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(10)" placeholder="Search"> <button type="button" onclick="clearFilter(9)">Clear</button></th>
         </tr>
         </thead>
         <tbody>
@@ -53,7 +55,15 @@
             <td><%= Passenger.emergency_contact_name %></td> 
             <td><%= Passenger.emergency_contact_relation %></td> 
             <td><%= Passenger.emergency_contact_phone %></td> 
-            <td><%= Passenger.waiver_signed %></td> 
+            <td><%= Passenger.waiver_signed === 1 ? "Yes" : "No" %></td> 
+            <td>
+              <% if (Passenger.photos === 1) { %>
+                📸
+              <% } %>
+              <% if (Passenger.videos === 1) { %>
+                🎥
+              <% } %>
+            </td>
             </tr>
         <% }); %>
         </tbody>

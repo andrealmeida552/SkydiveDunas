@@ -1817,7 +1817,17 @@ app.get('/register/new-instructor', isLoggedIn, hasRoleLevel(2), async (req, res
 // List Tandem passengers
 app.get('/tandem/list-passengers', isLoggedIn, hasRoleLevel(2), async (req, res) => {
   try {
-    const [rows] = await pool.execute('SELECT * FROM passengers'); 
+    const [rows] = await pool.execute(`
+      SELECT 
+          p.*, 
+          t.waiver_signed, 
+          t.photos, 
+          t.videos
+      FROM 
+          passengers p
+      LEFT JOIN 
+          tandems t ON p.passenger_id = t.passenger_id;
+      `); 
 
     res.render('index', { 
     title: 'List Tandem Passengers',
