@@ -101,7 +101,7 @@ async function createTransaction(transactionData) {
     // Update tandem instructor tandem_balance, photos and videos balance
     // [ ] Test transaction records of balance of instructor jumps, photos and videos
     if(transactionData.transaction_type === 'tandem_jump' || transactionData.transaction_type === 'cancel_tandem_jump') {
-      // 1. Retrieve funjumper_id from tandem_instructors using tandem_id
+      // 1. Retrieve tandem_instructor_id from tandem_instructors using tandem_id
       const [instructorData] = await pool.execute(`
         SELECT ti.tandem_instructor_id
         FROM tandems td
@@ -112,7 +112,7 @@ async function createTransaction(transactionData) {
       if (instructorData && instructorData.length > 0 && instructorData[0].tandem_instructor_id) {
         const instructorId = instructorData[0].tandem_instructor_id;
 
-        // 2. Calculate tandem jump balance using funjumper_id
+        // 2. Calculate tandem jump balance using tandem_instructor_id
         const [tandem_jumps_balanceResult] = await pool.execute(`
           SELECT 
             SUM(CASE WHEN t.transaction_type IN ('tandem_jump', 'cancel_tandem_jump') THEN t.amount ELSE 0 END) AS balance
@@ -123,10 +123,10 @@ async function createTransaction(transactionData) {
 
         const tandem_jumps_newBalance = tandem_jumps_balanceResult[0].balance;
 
-        // 3. Update the tandem_jump_balance in your fun_jumpers table
+        // 3. Update the tandem_jump_balance in your tandem_instructors table
         await pool.execute(`
           UPDATE tandem_instructors
-          SET tandem_jumps = ?
+          SET jump_balance = ?
           WHERE tandem_instructor_id = ?
         `, [tandem_jumps_newBalance, instructorId]);
       } else {
@@ -464,9 +464,9 @@ app.post('/api/loads/:loadId/add-tandem', isLoggedIn, hasRoleLevel(5), async (re
       transaction_type: 'tandem_jump',
       funjumper_id: null,
       pilot_id: null,
-      tandem_id: instructorId,
+      tandem_id: tandemId,
       amount: +1,
-      notes: `Tandem Instructor on load ${loadId} with passenger ${passengerId}`
+      notes: `Tandem Instructor ${instructorId} on load ${loadId} with passenger ${passengerId}`
     });
 
     // Retrieve photos and videos from the tandem entry
@@ -489,7 +489,7 @@ app.post('/api/loads/:loadId/add-tandem', isLoggedIn, hasRoleLevel(5), async (re
         transaction_type: 'tandem_photos',
         funjumper_id: passengerId,
         pilot_id: null,
-        tandem_id: instructorId,
+        tandem_id: tandemId,
         amount: +1,
         notes: `Tandem photos on load ${loadId} with passenger ${passengerId}`
       });
@@ -500,7 +500,7 @@ app.post('/api/loads/:loadId/add-tandem', isLoggedIn, hasRoleLevel(5), async (re
         transaction_type: 'tandem_videos',
         funjumper_id: passengerId,
         pilot_id: null,
-        tandem_id: instructorId,
+        tandem_id: tandemId,
         amount: +1,
         notes: `Tandem video on load ${loadId} with passenger ${passengerId}`
       });
@@ -574,17 +574,65 @@ app.delete('/api/loads/:loadId/remove-tandem/:tandemId', isLoggedIn, hasRoleLeve
   try {
     const { loadId, tandemId } = req.params;
 
-    // Delete the jump record from the database, related to the tandem.
-    await pool.execute(`
-      DELETE FROM jumps WHERE tandem_id = ? AND load_id = ?
-    `, [tandemId, loadId]);
-
-    // Set tandem_instructor_id to NULL in the tandems table
-    await pool.execute(`
-      UPDATE tandems SET tandem_instructor_id = NULL WHERE tandem_id = ?
-    `, [tandemId]);
+    //Record transactions
+    await createTransaction({
+      transaction_type: 'cancel_tandem_jump',
+      funjumper_id: null,
+      pilot_id: null,
+      tandem_id: tandemId,
+      amount: -1,
+      notes: `Canceled tandem id ${tandemId} on jump ${loadId}`
+    });
 
     res.status(200).json({ success: true, message: 'Tandem removed from load successfully.' });
+
+    // [x] Find passenger id
+    const [PassengerData] = await pool.execute(`
+      SELECT passenger_id
+      FROM tandems
+      WHERE tandem_id = ?;
+      `, [tandemId]);
+      const passengerId = PassengerData[0].passenger_id;
+
+    // [x] Get if there were any photos of videos
+    const [multimedia] = await pool.execute(`
+      SELECT photos, videos
+      FROM tandems
+      WHERE tandem_id = ?;
+      `, [tandemId]);
+
+      // Checks if there are any multimedia predited to that jump
+      if(multimedia && multimedia.length > 0) {
+        if(multimedia[0].photos === 1) {
+          await createTransaction({
+            transaction_type: 'cancel_tandem_photos',
+            funjumper_id: null,
+            pilot_id: null,
+            tandem_id: tandemId,
+            amount: -1,
+            notes: `Tandem photos removed from passenger ${passengerId} on load ${loadId}`
+          });
+        }
+        if(multimedia[0].videos === 1) {
+          await createTransaction({
+            transaction_type: 'cancel_tandem_videos',
+            funjumper_id: null,
+            pilot_id: null,
+            tandem_id: tandemId,
+            amount: -1,
+            notes: `Tandem videos removed from passenger ${passengerId} on load ${loadId}`
+          });
+        }
+      }
+
+      // Delete the jump record from the database, related to the tandem.
+      await pool.execute(`
+        DELETE FROM jumps WHERE tandem_id = ? AND load_id = ?
+        `, [tandemId, loadId]);
+      // Set tandem_instructor_id to NULL in the tandems table
+      await pool.execute(`
+        UPDATE tandems SET tandem_instructor_id = NULL WHERE tandem_id = ?
+      `, [tandemId]);
 
   } catch (error) {
     console.error('Error removing tandem from load:', error);

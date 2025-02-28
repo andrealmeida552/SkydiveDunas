@@ -19,3 +19,4 @@
 
 -> Add Tandem capabilities
 - [ ] Think the whole process
+- [ ] List jumps when there are tandems, are not showing them.
