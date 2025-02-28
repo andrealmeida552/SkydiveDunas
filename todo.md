@@ -18,5 +18,4 @@
 - [ ] Add the toogle status to turn left Active Loads into Inactive Loads
 
 -> Add Tandem capabilities
-- [ ] Think the whole process
-- [ ] List jumps when there are tandems, are not showing them.
+- [x] List jumps when there are tandems, are not showing them.

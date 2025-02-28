@@ -29,8 +29,7 @@
             <th onclick="sortTable(11)">↕ Number of Jumps</th>
             <th onclick="sortTable(12)">↕ Waiver Signed</th>
             <th onclick="sortTable(13)">↕ Date of Birth</th>
-            <th onclick="sortTable(14)">↕ Money Balance</th>
-            <th onclick="sortTable(15)">↕ Jump Ticket Balance</th>
+            <th onclick="sortTable(14)">↕ Jump Ticket Balance</th>
         </tr>
         <tr>
             <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(0)" placeholder="Search"> <button type="button" onclick="clearFilter(0)">Clear</button></th>
@@ -48,7 +47,6 @@
             <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(12)" placeholder="Search"> <button type="button" onclick="clearFilter(12)">Clear</button></th>
             <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(13)" placeholder="Search"> <button type="button" onclick="clearFilter(13)">Clear</button></th>
             <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(14)" placeholder="Search"> <button type="button" onclick="clearFilter(14)">Clear</button></th>
-            <th><input type="text" class="form-control form-control-sm" onkeyup="filterTable(15)" placeholder="Search"> <button type="button" onclick="clearFilter(15)">Clear</button></th>
         </tr>
         </thead>
         <tbody>
@@ -72,7 +70,6 @@
             <td><%= Funjumpers.number_of_jumps %></td> 
             <td><%= Funjumpers.waiver_signed %></td> 
             <td><%= new Date(Funjumpers.date_of_birth).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td> 
-            <td><span class="<%= Funjumpers.balance < 0 ? 'text-danger' : '' %>"><%= Funjumpers.balance %></span></td>
             <td><span class="<%= Funjumpers.jump_ticket_balance < 0 ? 'text-danger' : '' %>"><%= Funjumpers.jump_ticket_balance %></span></td>
             </tr>
         <% }); %>

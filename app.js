@@ -11,7 +11,6 @@ const axios = require('axios');
 
 const app = express();
 const port = 3000;
-const JUMP_TICKET_PRICE = 40; // Price of a jump ticket
 
 // Configure session middleware
 app.use(session({
@@ -82,7 +81,8 @@ async function createTransaction(transactionData) {
     ]);
 
     // Update funjumper's jump_ticket_balance if necessary
-    if (transactionData.transaction_type === 'jump' || transactionData.transaction_type === 'cancel_jump') {
+    if (transactionData.transaction_type === 'jump' || transactionData.transaction_type === 'cancel_jump' ||
+      transactionData.transaction_type === 'buy_jumpticket' || transactionData.transaction_type === 'cancel_jumpticket') {
       const [jumpticket_balanceResult] = await pool.execute(`
         SELECT SUM(CASE WHEN t.transaction_type IN ('jump', 'cancel_jump', 'buy_jumpticket', 'cancel_jumpticket') THEN t.amount ELSE 0 END) AS balance
         FROM transactions t
@@ -99,7 +99,7 @@ async function createTransaction(transactionData) {
     }
 
     // Update tandem instructor tandem_balance, photos and videos balance
-    // [ ] Test transaction records of balance of instructor jumps, photos and videos
+    // [x] Test transaction records of balance of instructor jumps, photos and videos
     if(transactionData.transaction_type === 'tandem_jump' || transactionData.transaction_type === 'cancel_tandem_jump') {
       // 1. Retrieve tandem_instructor_id from tandem_instructors using tandem_id
       const [instructorData] = await pool.execute(`
@@ -1650,7 +1650,16 @@ app.get('/funjumpers/:funjumperId', isLoggedIn, hasRoleLevel(2), async (req, res
     const [funjumper] = await pool.execute('SELECT * FROM fun_jumpers WHERE funjumper_id = ?', [funjumperId]);
 
     if (funjumper.length === 0) {
-      return res.status(404).send('Funjumper not found.'); // TODO - Add here a custom webpage for this.
+      return res.status(404).res.render('index', { 
+          title: 'Funjumper Details',
+          page: 'funjumper-details',
+          menuItems: menuItems,
+          user: req.session.user,
+          errors: ['Funjumper not found'],
+          funjumper: null,
+          transactions: null,
+          jumps: null
+        });
     }
 
     const [funjumper_jumps] = await pool.execute(`
@@ -2932,7 +2941,7 @@ app.post('/transactions/create/funjumper', isLoggedIn, hasRoleLevel(2),
     try {
       const { funjumperSearch, funjumper_id, transaction_type, amount, notes } = req.body;
 
-      if (transaction_type === 'buy_jumpticket') { // Transform Balance money into jumptickets
+      if (transaction_type === 'buy_jumpticket') { // Adds jumptickets
         const transactionDataTickets = {
           transaction_type: transaction_type, 
           funjumper_id: funjumper_id, 
@@ -2956,7 +2965,7 @@ app.post('/transactions/create/funjumper', isLoggedIn, hasRoleLevel(2),
         });
       }
 
-      if (transaction_type === 'cancel_jumpticket') { // Cancels the jump ticket and returns the money to the balance account
+      if (transaction_type === 'cancel_jumpticket') { // Cancels the jump ticket
         const transactionDataTickets = {
           transaction_type: transaction_type, 
           funjumper_id: funjumper_id, 
@@ -3063,7 +3072,7 @@ app.post('/tandem/checkin', isLoggedIn, hasRoleLevel(2),
         ]
       );
 
-      const waiver_signed = req.body.waiverSigner === 'on' ? 1 : 0; // Convert checkbox to 1 or 0
+      const waiver_signed = req.body.waiver_signed === 'on' ? 1 : 0; // Convert checkbox to 1 or 0
       const photos = req.body.photos === 'on' ? 1 : 0; // Convert checkbox to 1 or 0
       const video = req.body.video === 'on' ? 1 : 0; // Convert checkbox to 1 or 0
 
