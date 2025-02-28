@@ -19,3 +19,5 @@
 
 -> Add Tandem capabilities
 - [x] List jumps when there are tandems, are not showing them.
+- [ ] Add page to edit/update information of passenger
+- [ ] Add quick buttons to add/remove photos or videos on tandem

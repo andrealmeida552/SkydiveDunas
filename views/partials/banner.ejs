@@ -16,7 +16,9 @@
       <% if (typeof weather !== 'undefined' && weather) { %>
         <div class="row">
           <div class="col-4">
-            <img src="http://openweathermap.org/img/wn/<%= weather.weather[0].icon %>@2x.png" alt="Weather Icon" style="max-width: 100%;">
+            <a href="https://www.windy.com/40.664/-8.730/meteogram?40.602,-8.649,11" target="_blank" rel="noopener noreferrer">
+              <img src="http://openweathermap.org/img/wn/<%= weather.weather[0].icon %>@2x.png" alt="Weather Icon" style="max-width: 100%;">
+            </a>
           </div>
           <div class="col-8 text-start">
             <p><strong>Temperature:</strong> <%= weather.main.temp %>°C</p>

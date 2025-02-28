@@ -40,15 +40,26 @@
         <tbody>
         <% listContent.forEach(load => { %>
             <tr>
-            <td scope="row"><%= load.load_id %></td> 
-            <td><%= load.tail_number %></td>
-            <td><%= load.pilot_name %></td>
-            <td><%= new Date(load.takeoff_datetime).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
-            <td><%= new Date(load.takeoff_datetime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) %></td>
-            <td><%= load.status %></td>
-            <td><%= load.occupancy === null ? '0' : load.occupancy %> / <%= load.slots %></td>
-            <td><%= load.notes %></td>
-            <td><a href="/operation/manifest/details/<%= load.load_id %>" class="btn btn-sm btn-primary">View</a></td>
+              <td scope="row"><%= load.load_id %></td> 
+              <td><%= load.tail_number %></td>
+              <td><%= load.pilot_name %></td>
+              <td><%= new Date(load.takeoff_datetime).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
+              <td><%= new Date(load.takeoff_datetime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) %></td>
+              <td><%= load.status %></td>
+              <td><%= load.occupancy === null ? '0' : load.occupancy %> / <%= load.slots %></td>
+              <td><%= load.notes %></td>
+              <td>
+                <% if (load.status === 'Active') { %>
+                  <button id="toggleStatusButton_<%= load.load_id %>" class="btn btn-sm btn-danger" onclick="toggleLoadStatus(<%= load.load_id %>)">
+                    Deactivate <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                  </button>
+                <% } else { %>
+                  <button id="toggleStatusButton_<%= load.load_id %>" class="btn btn-sm btn-success" onclick="toggleLoadStatus(<%= load.load_id %>)">
+                    Activate <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                  </button>
+                <% } %>
+                <a href="/operation/manifest/details/<%= load.load_id %>" class="btn btn-sm btn-primary">View</a>
+              </td>
             </tr>
         <% }); %>
         </tbody>
@@ -95,27 +106,55 @@
     }
 
     function filterTable(n) {
-        var input, filter, table, tr, td, i, txtValue;
-        input = document.getElementsByTagName('input')[n]; 
-        filter = input.value.toUpperCase();
-        table = document.getElementById("loadsTable");
-        tr = table.getElementsByTagName("tr");
-        for (i = 0; i < tr.length; i++) {
-          td = tr[i].getElementsByTagName("td")[n]; 
-          if (td) {
-            txtValue = td.textContent || td.innerText;
-            if (txtValue.toUpperCase().indexOf(filter) > -1) {
-              tr[i].style.display = "";
-            } else {
-              tr[i].style.display = "none";
-            }
-          }       
-        }
+      var input, filter, table, tr, td, i, txtValue;
+      input = document.getElementsByTagName('input')[n]; 
+      filter = input.value.toUpperCase();
+      table = document.getElementById("loadsTable");
+      tr = table.getElementsByTagName("tr");
+      for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[n]; 
+        if (td) {
+          txtValue = td.textContent || td.innerText;
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }       
       }
+    }
 
-      function clearFilter(n) {
-        var input = document.getElementsByTagName('input')[n];
-        input.value = ""; // Clear the input field
-        filterTable(n); // Re-filter the table with empty search term
-      }
+    function clearFilter(n) {
+      var input = document.getElementsByTagName('input')[n];
+      input.value = ""; // Clear the input field
+      filterTable(n); // Re-filter the table with empty search term
+    }
+
+    function toggleLoadStatus(loadId) {
+      const button = document.getElementById(`toggleStatusButton_${loadId}`); 
+      const spinner = button.querySelector('.spinner-border'); 
+    
+      spinner.classList.remove('d-none'); 
+      button.disabled = true; 
+    
+      fetch(`/operation/manifest/toggle-status/${loadId}`, {
+        method: 'POST' 
+      })
+      .then(response => {
+        if (response.ok) {
+          // Refresh the page after successful status toggle
+          location.reload(); 
+        } else {
+          alert('Error toggling load status.'); 
+          spinner.classList.add('d-none'); 
+          button.disabled = false; 
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while toggling load status.');
+        spinner.classList.add('d-none'); 
+        button.disabled = false; 
+      });
+    }
   </script>
