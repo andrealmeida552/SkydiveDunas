@@ -1336,21 +1336,72 @@ app.get('/lists/jumps', isLoggedIn, hasRoleLevel(2), async (req, res) => {
       SELECT 
           j.jump_id, 
           j.load_id, 
-          CONCAT(f.first_name, ' ', f.last_name) AS funjumper_name, 
+          CONCAT(ti_fj.first_name, ' ', ti_fj.last_name) AS funjumper_name, 
           jt.height_feet, 
           j.group_id, 
           j.notes, 
-          l.takeoff_datetime 
+          l.takeoff_datetime,
+          'Instructor' AS jump_type_label
       FROM 
           jumps j
-      JOIN 
-          fun_jumpers f ON j.funjumper_id = f.funjumper_id
-      JOIN
+      LEFT JOIN 
+          tandems t ON j.tandem_id = t.tandem_id
+      LEFT JOIN
           loads l ON j.load_id = l.load_id
-      JOIN 
+      LEFT JOIN 
           jump_types jt ON j.jump_type_id = jt.jump_type_id
+      LEFT JOIN
+          tandem_instructors ti ON t.tandem_instructor_id = ti.tandem_instructor_id
+      LEFT JOIN
+          fun_jumpers ti_fj ON ti.funjumper_id = ti_fj.funjumper_id
+      WHERE j.tandem_id IS NOT NULL
+
+      UNION ALL
+
+      SELECT 
+          j.jump_id, 
+          j.load_id, 
+          CONCAT(p.first_name, ' ', p.last_name) AS funjumper_name, 
+          jt.height_feet, 
+          j.group_id, 
+          j.notes, 
+          l.takeoff_datetime,
+          'Passenger' AS jump_type_label
+      FROM 
+          jumps j
+      LEFT JOIN 
+          tandems t ON j.tandem_id = t.tandem_id
+      LEFT JOIN
+          loads l ON j.load_id = l.load_id
+      LEFT JOIN 
+          jump_types jt ON j.jump_type_id = jt.jump_type_id
+      LEFT JOIN
+          passengers p ON t.passenger_id = p.passenger_id
+      WHERE j.tandem_id IS NOT NULL
+
+      UNION ALL
+
+      SELECT
+          j.jump_id,
+          j.load_id,
+          CONCAT(f.first_name, ' ', f.last_name) AS funjumper_name,
+          jt.height_feet,
+          j.group_id,
+          j.notes,
+          l.takeoff_datetime,
+          'Fun Jumper' as jump_type_label
+      FROM
+          jumps j
+      LEFT JOIN
+          fun_jumpers f ON j.funjumper_id = f.funjumper_id
+      LEFT JOIN
+          loads l ON j.load_id = l.load_id
+      LEFT JOIN
+          jump_types jt ON j.jump_type_id = jt.jump_type_id
+      WHERE j.tandem_id IS NULL
+
       ORDER BY 
-          j.jump_id DESC;
+          takeoff_datetime DESC, jump_id DESC;
       `); 
     res.render('index', { 
       title: 'List Jumps',

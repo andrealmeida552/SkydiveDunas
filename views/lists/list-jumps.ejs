@@ -57,7 +57,7 @@
   <script>
     function sortTable(n) {
       var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-      table = document.getElementById("loadsTable");
+      table = document.getElementById("jumpsTable");
       switching = true;
       dir = "asc"; 
       while (switching) {
@@ -96,7 +96,7 @@
         var input, filter, table, tr, td, i, txtValue;
         input = document.getElementsByTagName('input')[n]; 
         filter = input.value.toUpperCase();
-        table = document.getElementById("loadsTable");
+        table = document.getElementById("jumpsTable");
         tr = table.getElementsByTagName("tr");
         for (i = 0; i < tr.length; i++) {
           td = tr[i].getElementsByTagName("td")[n]; 
