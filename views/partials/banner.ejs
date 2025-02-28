@@ -21,7 +21,7 @@
             </a>
           </div>
           <div class="col-8 text-start">
-            <p><strong>Temperature:</strong> <%= weather.main.temp %>°C</p>
+            <p><strong>Temperature:</strong> <%= Math.round(weather.main.temp) %>°C</p>
             <p><strong>Wind:</strong> 
               <% 
                 const windSpeedKt = Math.round(weather.wind.speed * 1.94); 
